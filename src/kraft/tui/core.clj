@@ -9,7 +9,7 @@
   (print (str esc "1A" "\r" esc "2K" s "\n"))
   (flush))
 
-(defn ask-question!
+(defn- ask-question!
   "Ask Q; echo the answer on the same (previous) line in bold green.
    Returns the trimmed answer."
   [question]
@@ -18,8 +18,17 @@
     (rewrite-prev-line! (str question  (bold-green answer)))
     answer))
 
+(defn- ask-choice! [question options]
+  (print question) (flush)
+  (let [opt-map (into {} options)             ; {:github "GitHub", :azure "Azure DevOps"}
+        answer  (menu/create-menu! options)   ; e.g., :github
+        label   (get opt-map answer)]
+    (rewrite-prev-line! (str question " " (bold-green (or label (name answer)))))
+    answer))
+
+
 (defn ask-project-name! []
   (ask-question! "What is your project's name? "))
 
 (defn choose-ci-provider! []
-  (menu/choose! "Choose CI provider:" [[:github "GitHub"] [:azure "Azure DevOps"]]))
+  (ask-choice! "Choose CI provider:" [[:github "GitHub"] [:azure "Azure DevOps"]]))

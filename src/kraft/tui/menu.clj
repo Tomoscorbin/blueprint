@@ -26,10 +26,16 @@
     (println (str "▶ " (green-bold opt)))
     (println opt))) ; no indent on unselected
 
-(defn choose!
+(defn- delete-options-block! [n]
+  ;; go to first option line relative to saved cursor, then delete n lines
+  (goto-line! 2)
+  (print (str esc n "M")) ; CSI n M  (DL = Delete Line)
+  (flush))
+
+(defn create-menu!
   "Inline menu. Arrow up/down to move, Enter to select.
-   `options` must be a vector of [key label]. Returns the selected key."
-  [title options]
+   `options` must be a vector of [key label]. Returns the selected key-value pair as a map."
+  [options]
   (when (or (not (sequential? options)) (empty? options)
             (not (every? (fn [x] (and (vector? x)
                                       (= 2 (count x))
@@ -39,15 +45,16 @@
     (throw (ex-info "options must be a vector of [keyword label] pairs" {:options options})))
 
   (let [opts  (vec options)
-        lines (inc (count opts))                 ; title + N options
+        lines (inc (count opts))
         term  (.build (TerminalBuilder/builder))
         rdr   (.reader term)]
     (try
       (.enterRawMode term)
 
       ;; initial render
+      (hide-cursor!) 
       (save-cursor!)
-      (goto-line! 1) (print-title! title)
+      (goto-line! 1)
       (doseq [[i [_ label]] (map-indexed vector opts)]
         (goto-line! (+ 2 i)) (print-option! label (= i 0)))
       ;; park cursor after block (so typing later doesn't overwrite it)
@@ -79,6 +86,7 @@
 
             :else (recur idx))))
       (finally
+        (delete-options-block! lines)
         (show-cursor!)
         (.close rdr)
         (.close term)))))
