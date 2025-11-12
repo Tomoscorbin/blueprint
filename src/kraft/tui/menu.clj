@@ -79,6 +79,6 @@
 
             :else (recur idx))))
       (finally
-(show-cursor!)
+        (show-cursor!)
         (.close rdr)
         (.close term)))))
