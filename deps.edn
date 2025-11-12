@@ -1,6 +1,10 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.12.1"}
-        selmer/selmer       {:mvn/version "1.12.67"}}
+        selmer/selmer       {:mvn/version "1.12.67"}
+        org.jline/jline {:mvn/version "3.30.6"}
+        org.jline/jline-reader   {:mvn/version "3.30.6"}
+        org.jline/jline-terminal {:mvn/version "3.30.6"}}
+
  :aliases
  {:run-m {:main-opts ["-m" "kraft"]}
   :run-x {:ns-default tomoscorbin.kraft

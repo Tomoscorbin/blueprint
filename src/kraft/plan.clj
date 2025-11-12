@@ -51,9 +51,9 @@
   "answers -> fully qualified layout map (ids -> absolute/OS-correct paths)."
   [answers]
   (let [root (:project-name answers)]
-    (-> (compose-layout answers)   ; base + CI + project slice (relative)
-        (apply-pkg root)           ; \"src/{pkg}\" -> \"src/<slug>\"
-        (qualify-layout root))))   ; prepend repo root to every path
+    (-> (compose-layout answers)
+        (apply-pkg root)
+        (qualify-layout root))))
 
 (defn prepare-template-data
   "Values your Selmer templates will use in file *contents*."
