@@ -52,7 +52,7 @@
       (.enterRawMode term)
 
       ;; initial render
-      (hide-cursor!) 
+      (hide-cursor!)
       (save-cursor!)
       (goto-line! 1)
       (doseq [[i [_ label]] (map-indexed vector opts)]

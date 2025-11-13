@@ -1,13 +1,15 @@
 (ns kraft.plan
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [kraft.policy.python-version :as pyver]))
 
 (def base-layout
   {:src       "src/{pkg}"
    ;; :tests     "tests"
    :readme    "README.md"
    :gitignore ".gitignore"
-   :conftest  "tests/conftest.py"})
+
+   :conftest   "tests/conftest.py"})
 
 (defn- join [root rel]
   (str (io/file root rel)))
@@ -15,6 +17,7 @@
 (defn- project->pkg [s]
   (-> s str/trim str/lower-case
       (str/replace #"[^a-z0-9_]+" "_")
+
       (str/replace #"_+" "_")
       (str/replace #"^_+|_+$" "")))
 
@@ -42,6 +45,8 @@
     :python-lib {:pyproject-lib   "pyproject.toml"}
     {}))
 
+(defn- choose-python-version [project-type])
+
 (defn- compose-layout [answers]
   (merge base-layout
          (choose-ci-layout answers)
@@ -60,3 +65,4 @@
   [answers]
   {:project_name (:project-name answers)
    :pkg          (project->pkg (:project-name answers))})
+

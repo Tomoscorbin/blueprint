@@ -20,15 +20,19 @@
 
 (defn- ask-choice! [question options]
   (print question) (flush)
-  (let [opt-map (into {} options)             ; {:github "GitHub", :azure "Azure DevOps"}
-        answer  (menu/create-menu! options)   ; e.g., :github
+  (let [opt-map (into {} options)
+        answer  (menu/create-menu! options)
         label   (get opt-map answer)]
     (rewrite-prev-line! (str question " " (bold-green (or label (name answer)))))
     answer))
-
 
 (defn ask-project-name! []
   (ask-question! "What is your project's name? "))
 
 (defn choose-ci-provider! []
-  (ask-choice! "Choose CI provider:" [[:github "GitHub"] [:azure "Azure DevOps"]]))
+  (ask-choice! "Choose your CI provider:" [[:github "GitHub"] [:azure "Azure DevOps"]]))
+
+(defn choose-project-type! []
+  (ask-choice! "Choose your project type:"
+               [[:python-lib "Python Library"]
+                [:dab "Databricks Asset Bundle"]]))
