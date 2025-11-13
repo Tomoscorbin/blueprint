@@ -5,10 +5,9 @@
 
 (def base-layout
   {:src       "src/{pkg}"
-   ;; :tests     "tests"
    :readme    "README.md"
    :gitignore ".gitignore"
-
+   :python-version ".python-version"
    :conftest   "tests/conftest.py"})
 
 (defn- join [root rel]
@@ -17,7 +16,6 @@
 (defn- project->pkg [s]
   (-> s str/trim str/lower-case
       (str/replace #"[^a-z0-9_]+" "_")
-
       (str/replace #"_+" "_")
       (str/replace #"^_+|_+$" "")))
 
@@ -45,8 +43,6 @@
     :python-lib {:pyproject-lib   "pyproject.toml"}
     {}))
 
-(defn- choose-python-version [project-type])
-
 (defn- compose-layout [answers]
   (merge base-layout
          (choose-ci-layout answers)
@@ -59,10 +55,4 @@
     (-> (compose-layout answers)
         (apply-pkg root)
         (qualify-layout root))))
-
-(defn prepare-template-data
-  "Values your Selmer templates will use in file *contents*."
-  [answers]
-  {:project_name (:project-name answers)
-   :pkg          (project->pkg (:project-name answers))})
 

@@ -1,21 +1,19 @@
-(ns kraft.exec 
+(ns kraft.exec
   (:require [clojure.java.io :as io]
             [selmer.parser :as selmer]))
-
 
 (def dir-ids #{:src})
 
 (def template-path
-  {
-   :readme          "templates/readme.md.selmer"
+  {:readme          "templates/readme.md.selmer"
    :gitignore       "templates/gitignore.selmer"
    :conftest        "templates/conftest.py.selmer"
    :github-ci       "templates/ci/github/ci.yml.selmer"
    :azure-ci        "templates/ci/azure/ci.yml.selmer"
    :pyproject-lib   "templates/pyproject/lib.toml.selmer"
    :pyproject-dab   "templates/pyproject/dabs.toml.selmer"
-   :databricks-yml  "templates/dabs/databricks.yml.selmer"})
-
+   :databricks-yml  "templates/dabs/databricks.yml.selmer"
+   :python-version  "templates/python-version.selmer"})
 
 (defn- ensure-parent! [^java.io.File f]
   (when-let [p (.getParentFile f)]
