@@ -4,7 +4,7 @@
             [kraft.policy.python-version :as pyver]))
 
 (def base-layout
-  {:src       "src/{pkg}"
+  {:main       "src/{pkg}/main.py"
    :readme    "README.md"
    :gitignore ".gitignore"
    :python-version ".python-version"
@@ -23,7 +23,7 @@
 (defn- apply-pkg
   "Replace {pkg} only in :src."
   [layout project-name]
-  (update layout :src #(str/replace % "{pkg}" (project->pkg project-name))))
+  (update layout :main #(str/replace % "{pkg}" (project->pkg project-name))))
 
 (defn- qualify-layout
   "Prepend the repo root to every path."
