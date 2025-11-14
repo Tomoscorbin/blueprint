@@ -1,6 +1,5 @@
 (ns kraft.tui.core
-  (:require [clojure.string :as str]
-            [kraft.tui.menu :as menu]))
+  (:require [kraft.tui.menu :as menu]))
 
 (def ^:private esc "\u001b[")
 (defn- bold-green [s] (str esc "1;32m" s esc "0m")) ; SGR: bold + green

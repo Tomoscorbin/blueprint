@@ -10,8 +10,7 @@
    :conftest        "templates/conftest.py.selmer"
    :github-ci       "templates/ci/github/ci.yml.selmer"
    :azure-ci        "templates/ci/azure/ci.yml.selmer"
-   :pyproject-lib   "templates/pyproject/lib.toml.selmer"
-   :pyproject-dab   "templates/pyproject/dabs.toml.selmer"
+   :pyproject       "templates/pyproject.toml.selmer"
    :databricks-yml  "templates/dabs/databricks.yml.selmer"
    :python-version  "templates/python-version.selmer"})
 

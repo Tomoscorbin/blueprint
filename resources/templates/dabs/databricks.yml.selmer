@@ -1,0 +1,25 @@
+
+bundle:
+  name: {{ project_name }}
+
+targets:
+{% if dev_host %}
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: {{ dev_host }}
+{% endif %}
+{% if stag_host %}
+  stag:
+    mode: development
+    workspace:
+      host: {{ stag_host }}
+{% endif %}
+{% if prod_host %}
+  prod:
+    mode: production
+    workspace:
+      host: {{ prod_host }}
+      root_path: /Shared/.bundle/prod/${bundle.name}
+{% endif %}

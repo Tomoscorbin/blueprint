@@ -8,6 +8,7 @@
    :readme    "README.md"
    :gitignore ".gitignore"
    :python-version ".python-version"
+   :pyproject  "pyproject.toml"
    :conftest   "tests/conftest.py"})
 
 (defn- join [root rel]
@@ -38,9 +39,7 @@
 
 (defn- choose-project-files [{:keys [project-type]}]
   (case project-type
-    :dabs       {:databricks-yml "databricks.yml"
-                 :pyproject-dab   "pyproject.toml"}
-    :python-lib {:pyproject-lib   "pyproject.toml"}
+    :dabs       {:databricks-yml "databricks.yml"}
     {}))
 
 (defn- compose-layout [answers]
@@ -59,5 +58,6 @@
 (defn collect-additional-details
   "Derived properties shared across templates."
   [answers]
-  {:python_version_value (pyver/resolve-python-version answers)})
+  {:python_version_value (pyver/resolve-python-version answers)
+   :requires_python_value (pyver/resolve-requires-python answers)})
 

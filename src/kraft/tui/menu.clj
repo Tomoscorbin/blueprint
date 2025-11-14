@@ -1,6 +1,5 @@
 
 (ns kraft.tui.menu
-  (:require [clojure.string :as str])
   (:import [org.jline.terminal TerminalBuilder]))
 
 ;; --- ANSI helpers ----------------------------------------------------------
@@ -16,9 +15,6 @@
 (defn- hide-cursor! [] (print (str esc "?25l")) (flush))
 (defn- show-cursor! [] (print (str esc "?25h")))
 (defn- green-bold [s] (str esc "1;32m" s esc "0m"))
-
-(defn- print-title! [title]
-  (clear-line!) (println title))
 
 (defn- print-option! [opt selected?]
   (clear-line!)

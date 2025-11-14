@@ -1,0 +1,25 @@
+[project]
+name = "{{ project_name }}"
+version = "0.0.1"
+authors = [{ name = "" }]
+requires-python = "{{ requires_python_value|safe}}"
+dependencies = [
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "ruff",
+    "mypy",
+    {{ if (= project_type "dabs") }}"databricks-connect>=15.4,<15.5"{{ end }},
+]
+
+[project.scripts]
+main = "{{ project_name }}.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 120
