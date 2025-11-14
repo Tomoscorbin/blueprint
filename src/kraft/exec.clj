@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [selmer.parser :as selmer]))
 
-(def template-path
+(def template-path ;;TODO: move all variables like this to a central place
   {:main            "templates/main.py.selmer"
    :readme          "templates/readme.md.selmer"
    :gitignore       "templates/gitignore.selmer"
@@ -10,7 +10,7 @@
    :github-ci       "templates/ci/github/ci.yml.selmer"
    :azure-ci        "templates/ci/azure/ci.yml.selmer"
    :pyproject       "templates/pyproject.toml.selmer"
-   :databricks-yml  "templates/dabs/databricks.yml.selmer"
+   :databricks-yml  "templates/databricks.yml.selmer"
    :python-version  "templates/python-version.selmer"})
 
 (defn- ensure-parent! [^java.io.File f]
