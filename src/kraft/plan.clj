@@ -56,3 +56,8 @@
         (apply-pkg root)
         (qualify-layout root))))
 
+(defn collect-additional-details
+  "Derived properties shared across templates."
+  [answers]
+  {:python_version_value (pyver/resolve-python-version answers)})
+

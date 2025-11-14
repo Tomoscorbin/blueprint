@@ -35,4 +35,4 @@
 (defn choose-project-type! []
   (ask-choice! "Choose your project type:"
                [[:python-lib "Python Library"]
-                [:dab "Databricks Asset Bundle"]]))
+                [:dabs "Databricks Asset Bundle"]]))
