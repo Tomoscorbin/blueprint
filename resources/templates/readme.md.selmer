@@ -1,1 +1,9 @@
 # {{ project_name }}
+#
+#
+Explain the following:
+- Need to configure Databricks CLI using secrets
+- assumes an SPN for Databricks
+- explain how to set up the environment with uv
+- 
+
