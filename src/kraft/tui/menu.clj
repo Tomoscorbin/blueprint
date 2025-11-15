@@ -1,7 +1,7 @@
 
 (ns kraft.tui.menu
   (:import [org.jline.terminal TerminalBuilder]))
-
+;;TODO: if I enter the first question too fast (project name), the menu reprints on each arrow key
 ;; --- ANSI helpers ----------------------------------------------------------
 (def ^:private esc "\u001b[")
 

@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
-      - run: pip install uv
+      - run: pip install uv #TODO: do we need to install uv every time?
       - run: uv venv && uv sync --all-groups
       - run: uv run ruff check .
 
@@ -30,27 +30,24 @@ jobs:
       - run: uv venv && uv sync --all-groups
       - run: uv run pytest -q
 
-{% if project_type = "python-lib" %} #TODO: attempt build for dabs too!
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6 #TODO: move action versions to one location?
+      - uses: actions/setup-python@v6
       - run: pip install uv
       - run: uv build
-      - uses: actions/upload-artifact@v4
+ {% if project_type = :python-lib %}     - uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/*
-    {% endif %}
-
-{% if project_type = "dabs" %} #TODO: This isnt working
+          path: dist/* {% endif %}
+  {% if project_type = :dabs %}
   validate:
     name: "Validate bundle"
     runs-on: ubuntu-latest
     env:
-      DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
-      DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+      DATABRICKS_CLIENT_ID: {% verbatim %}${{ secrets.DATABRICKS_CLIENT_ID }}{% endverbatim %}
+      DATABRICKS_CLIENT_SECRET: {% verbatim %}${{ secrets.DATABRICKS_CLIENT_SECRET }}{% endverbatim %}
     steps:
       - uses: actions/checkout@v3
       - uses: databricks/setup-cli@main
