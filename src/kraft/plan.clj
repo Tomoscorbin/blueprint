@@ -1,7 +1,7 @@
 (ns kraft.plan
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [kraft.policy.python-version :as pyver]))
+            [kraft.runtime :as runtime]))
 
 (def base-layout
   {:main       "src/{pkg}/main.py"
@@ -41,7 +41,8 @@
 
 (defn- choose-project-files [{:keys [project-type]}]
   (case project-type
-    :dabs       {:databricks-yml "databricks.yml"}
+    :dabs       {:databricks-yml "databricks.yml"
+                 :sample-job "resources/sample_job.job.yml"}
     {}))
 
 (defn- compose-layout [answers]
@@ -60,6 +61,7 @@
 (defn collect-additional-details
   "Derived properties shared across templates."
   [answers]
-  {:python_version_value (pyver/resolve-python-version answers)
-   :requires_python_value (pyver/resolve-requires-python answers)})
+  {:python_version_value (runtime/resolve-python-version answers)
+   :requires_python_value (runtime/resolve-requires-python answers)
+   :databricks_runtime (runtime/resolve-databricks-runtime answers)})
 

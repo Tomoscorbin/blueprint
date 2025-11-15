@@ -13,6 +13,7 @@
    :azure-ci        "templates/ci/azure/ci.yml.selmer"
    :pyproject       "templates/pyproject.toml.selmer"
    :databricks-yml  "templates/databricks.yml.selmer"
+   :sample-job      "templates/sample_job.job.yml.selmer"
    :python-version  "templates/python-version.selmer"})
 
 (defn- ensure-parent! [^java.io.File f]
