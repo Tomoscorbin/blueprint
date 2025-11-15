@@ -9,6 +9,7 @@
    :conftest        "templates/conftest.py.selmer"
    :github-ci       "templates/ci/github/ci.yml.selmer"
    :github-bump     "templates/ci/bump.yml.selmer"
+   :pre-commit      "templates/pre-commit-config.yml.selmer"
    :azure-ci        "templates/ci/azure/ci.yml.selmer"
    :pyproject       "templates/pyproject.toml.selmer"
    :databricks-yml  "templates/databricks.yml.selmer"

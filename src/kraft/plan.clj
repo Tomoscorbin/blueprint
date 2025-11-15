@@ -9,6 +9,7 @@
    :gitignore ".gitignore"
    :python-version ".python-version"
    :pyproject  "pyproject.toml"
+   :pre-commit ".pre-commit-config.yml"
    :conftest   "tests/conftest.py"})
 
 (defn- join [root rel]

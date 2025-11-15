@@ -12,6 +12,7 @@ dev = [
     "ruff",
     "mypy",
     "commitizen",
+    "pre-commit",
     {{ if (= project_type "dabs") }}"databricks-connect"{{ end }},
 ]
 
