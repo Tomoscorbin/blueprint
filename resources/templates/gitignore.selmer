@@ -1,0 +1,23 @@
+# ignore a variety of commonly ignored directories.
+
+.DS_Store
+.vscode/
+.git/
+.gitmodules
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+build/
+dist/
+*.egg-info/
+.eggs/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+.ipynb_checkpoints/
