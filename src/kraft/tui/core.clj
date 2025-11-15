@@ -28,6 +28,9 @@
 (defn ask-project-name! []
   (ask-question! "What is your project's name? "))
 
+(defn ask-databricks-host! []
+  (ask-question! "Enter your Databricks host name: "))
+
 (defn choose-ci-provider! []
   (ask-choice! "Choose your CI provider:" [[:github "GitHub"] [:azure "Azure DevOps"]]))
 

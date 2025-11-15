@@ -27,18 +27,12 @@ targets:
     mode: development
     default: true
     workspace:
-      host: https://dbc-d833a3e1-6ac9.cloud.databricks.com
-    variables:
-      catalog: workspace
-      schema: ${workspace.current_user.short_name}
+      host: {{ hostname }}
     presets:
       artifacts_dynamic_version: true
   prod:
     mode: production
     workspace:
-      host: https://dbc-d833a3e1-6ac9.cloud.databricks.com
+      host: {{ hostname }}
       root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
-    variables:
-      catalog: workspace
-      schema: prod
 
