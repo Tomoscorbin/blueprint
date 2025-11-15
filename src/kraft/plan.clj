@@ -33,7 +33,8 @@
 
 (defn- choose-ci-layout [{:keys [ci-provider]}]
   (case ci-provider
-    :github {:github-ci ".github/workflows/ci.yml"}
+    :github {:github-ci ".github/workflows/ci.yml"
+             :github-bump ".github/workflows/bump.yml"}
     :azure  {:azure-ci "azure-pipelines.yml"}
     {}))
 

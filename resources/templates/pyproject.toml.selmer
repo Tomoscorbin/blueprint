@@ -1,6 +1,6 @@
 [project]
 name = "{{ project_name }}"
-version = "0.0.1"
+version = "0.1.0"
 authors = [{ name = "" }]
 requires-python = "{{ requires_python_value|safe}}"
 dependencies = [
@@ -11,7 +11,8 @@ dev = [
     "pytest",
     "ruff",
     "mypy",
-    {{ if (= project_type "dabs") }}"databricks-connect>=15.4,<15.5"{{ end }},
+    "commitizen",
+    {{ if (= project_type "dabs") }}"databricks-connect"{{ end }},
 ]
 
 [project.scripts]
@@ -23,3 +24,9 @@ build-backend = "hatchling.build"
 
 [tool.ruff]
 line-length = 120
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+version_files = ["pyproject.toml:version"]
+update_changelog_on_bump = true

@@ -44,7 +44,7 @@ jobs:
           path: dist/*
     {% endif %}
 
-{% if project_type = "dabs" %}
+{% if project_type = "dabs" %} #TODO: This isnt working
   validate:
     name: "Validate bundle"
     runs-on: ubuntu-latest
