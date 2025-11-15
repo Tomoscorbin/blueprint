@@ -30,12 +30,12 @@ jobs:
       - run: uv venv && uv sync --all-groups
       - run: uv run pytest -q
 
-{% if project_type == "python-lib" %}
+{% if project_type == "python-lib" %} #TODO: attempt build for dabs too!
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v6 #TODO: move action versions to one location?
       - run: pip install uv
       - run: uv build
       - uses: actions/upload-artifact@v4
@@ -46,8 +46,11 @@ jobs:
 
 {% if project_type == "dabs" %}
   validate:
-    name: 'Validate bundle'
+    name: "Validate bundle"
     runs-on: ubuntu-latest
+    env:
+      DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
     steps:
       - uses: actions/checkout@v3
       - uses: databricks/setup-cli@main
