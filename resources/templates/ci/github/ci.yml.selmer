@@ -30,7 +30,7 @@ jobs:
       - run: uv venv && uv sync --all-groups
       - run: uv run pytest -q
 
-{% if project_type == "python-lib" %} #TODO: attempt build for dabs too!
+{% if project_type = "python-lib" %} #TODO: attempt build for dabs too!
   build:
     runs-on: ubuntu-latest
     steps:
@@ -44,7 +44,7 @@ jobs:
           path: dist/*
     {% endif %}
 
-{% if project_type == "dabs" %}
+{% if project_type = "dabs" %}
   validate:
     name: "Validate bundle"
     runs-on: ubuntu-latest

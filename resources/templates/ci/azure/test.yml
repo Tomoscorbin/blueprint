@@ -56,7 +56,7 @@ jobs:
         env:
           DATABRICKS_HOST: $(DATABRICKS_HOST)
           DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
-      # Build wheel {% if project_type == "dabs" %}(just to catch packaging issues){% endif %}
+      # Build wheel {% if project_type = "dabs" %}(just to catch packaging issues){% endif %}
       - script: |
         uv build displayName: "Build wheel"
 

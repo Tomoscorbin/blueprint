@@ -48,7 +48,7 @@ jobs:
         inputs:
           testResultsFiles: "reports/test-results.xml"
           testRunTitle: "PyTest Results"
-      {% if project_type == "dabs" %}
+      {% if project_type = "dabs" %}
       # Install Databricks CLI & validate bundle
       - script: |
           curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
@@ -58,10 +58,10 @@ jobs:
           DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
           DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
       {% endif %}
-      # Build wheel {% if project_type == "dabs" %}(just to catch packaging issues){% endif %}
+      # Build wheel {% if project_type = "dabs" %}(just to catch packaging issues){% endif %}
       - script: |
         uv build displayName: "Build wheel"
-      {% if project_type == "python-lib" %}
+      {% if project_type = "python-lib" %}
       - task: publishbuildartifacts@1
         inputs:
           pathtopublish: "$(build.sourcesdirectory)/dist"
