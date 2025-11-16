@@ -1,23 +1,15 @@
-{:paths ["src" "resources"]
- :deps {org.clojure/clojure {:mvn/version "1.12.1"}
+{:paths ["src" "resources" "test"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.3"}
         selmer/selmer       {:mvn/version "1.12.67"}
-        org.jline/jline {:mvn/version "3.30.6"}
+        org.jline/jline {:mvn/version "3.30.6"} ;;TODO: do we need to remove any of these?
         org.jline/jline-reader   {:mvn/version "3.30.6"}
         org.jline/jline-terminal {:mvn/version "3.30.6"}}
 
  :aliases
  {:run-m {:main-opts ["-m" "kraft"]}
-  :run-x {:ns-default tomoscorbin.kraft
-          :exec-fn greet
-          :exec-args {:name "Clojure"}}
-  :build {:deps {io.github.clojure/tools.build
-                 {:mvn/version "0.10.10"}
-                 selmer/selmer {:mvn/version "1.12.67"}}
-          :ns-default build}
-  :test {:extra-paths ["test"]
-         :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}
-                      io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}}
-
-  :repl  {:extra-deps {nrepl/nrepl {:mvn/version "1.1.1"}}
-          :main-opts  ["-m" "nrepl.cmdline" "--port" "7888"]}}
- }
+  :nrepl
+  {:extra-deps {nrepl/nrepl       {:mvn/version "1.0.0"}
+                cider/cider-nrepl {:mvn/version "0.42.1"}}
+   :main-opts  ["--main" "nrepl.cmdline"
+                "--middleware" "[cider.nrepl/cider-middleware]"
+                "--interactive"]}}}
