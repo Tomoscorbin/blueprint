@@ -45,7 +45,10 @@
    :python-version
    :pyproject
    :pre-commit
-   :conftest])
+   :conftest
+   :test-init
+   :test-main
+   :makefile])
 
 (defn- base-layout []
   (select-keys layout-spec base-layout-keys))
