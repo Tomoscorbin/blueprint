@@ -1,0 +1,89 @@
+# Directories
+SRC_DIR := src
+TEST_DIR := tests
+
+# Default target when you just run `make`
+.DEFAULT_GOAL := help
+
+.PHONY: help
+help:
+	@echo "Available targets:"
+	@echo "  init          Set up virtualenv and install dependencies"
+	@echo "  ruff          Run ruff check"
+	@echo "  fix           Run ruff check --fix"
+	@echo "  format        Run ruff format"
+	@echo "  types         Run mypy"
+	@echo "  lint          Run ruff check + mypy"
+	@echo "  test          Run unit & integration tests"
+	@echo "  all           Run ruff check + mypy + all tests"
+	# @echo "  test-unit     Run unit tests only"
+	# @echo "  test-int      Run integration tests only"
+	@echo "  clean         Remove build / cache artefacts"
+	@echo "  build         Build the Python package (wheel + sdist)"
+
+# ----------------------------------------------------------------------
+# Setup
+# ----------------------------------------------------------------------
+.PHONY: init
+init:
+	uv sync --all-groups
+
+# ----------------------------------------------------------------------
+# Static analysis
+# ----------------------------------------------------------------------
+.PHONY: ruff
+ruff:
+	uv run ruff check $(SRC_DIR) $(TEST_DIR)
+
+.PHONY: fix
+fix:
+	uv run ruff check $(SRC_DIR) $(TEST_DIR) --fix
+
+.PHONY: format
+format:
+	uv run ruff format $(SRC_DIR) $(TEST_DIR)
+
+.PHONY: types
+types:
+	uv run mypy $(SRC_DIR)
+
+.PHONY: lint
+lint: ruff types
+
+# ----------------------------------------------------------------------
+# Tests
+# ----------------------------------------------------------------------
+.PHONY: test
+test:
+	uv run pytest -q
+
+# If you decide to split tests later:
+#.PHONY: test-unit
+#test-unit:
+#	uv run pytest -q $(TEST_DIR)/unit
+#
+#.PHONY: test-int
+#test-int:
+#	uv run pytest -q $(TEST_DIR)/integration
+
+.PHONY: all
+all: lint test
+
+# ----------------------------------------------------------------------
+# Build / clean
+# ----------------------------------------------------------------------
+.PHONY: build
+build:
+	uv build
+
+.PHONY: clean
+clean:
+	rm -rf \
+	  .mypy_cache \
+	  .pytest_cache \
+	  .ruff_cache \
+	  .coverage \
+	  htmlcov \
+	  build \
+	  dist \
+	  *.egg-info

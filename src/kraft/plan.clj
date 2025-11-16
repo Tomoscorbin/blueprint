@@ -24,6 +24,10 @@
                      :source "templates/pre-commit-config.yml.selmer"}
    :conftest        {:destination "tests/conftest.py"
                      :source "templates/conftest.py.selmer"}
+   :test-init       {:destination "tests/__init__.py"
+                     :source nil}
+   :makefile        {:destination "Makefile"
+                     :source "templates/makefile.selmer"}
    :github-ci       {:destination ".github/workflows/ci.yml"
                      :source "templates/ci/github/ci.yml.selmer"}
    :github-bump     {:destination ".github/workflows/bump.yml"
