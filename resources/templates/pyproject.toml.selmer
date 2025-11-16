@@ -7,6 +7,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+  "pyspark",
   "pytest",
   "ruff",
   "mypy",
