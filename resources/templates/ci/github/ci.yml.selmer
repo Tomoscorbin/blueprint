@@ -3,6 +3,7 @@ on: [pull_request]
 
 jobs:
   lint:
+    name: "Run linter"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -12,6 +13,7 @@ jobs:
       - run: make lint
 
   types:
+    name: "Run type checker"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -21,6 +23,7 @@ jobs:
       - run: make types
 
   tests:
+    name "Run unit tests"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -30,6 +33,7 @@ jobs:
       - run: make test
 
   wheel:
+    run: "Build wheel"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -38,7 +42,7 @@ jobs:
       - run: make init
       - run: make build
 
-  validate:
+  bundle:
     name: "Validate bundle"
     runs-on: ubuntu-latest
     env:
