@@ -3,10 +3,6 @@
             [clojure.string :as str]
             [kraft.runtime :as runtime]))
 
-(def answers {:project-name "demo"
-              :ci-provider :github
-              :project-type :dabs})
-
 (def ^:private layout-spec
   {:main            {:destination "src/{pkg}/main.py"
                      :source "templates/main.py.selmer"}
@@ -26,6 +22,8 @@
                      :source "templates/conftest.py.selmer"}
    :test-init       {:destination "tests/__init__.py"
                      :source nil}
+   :test-main       {:destination "tests/test_main.py"
+                     :source "templates/test_main.py.selmer"}
    :makefile        {:destination "Makefile"
                      :source "templates/makefile.selmer"}
    :github-ci       {:destination ".github/workflows/ci.yml"
