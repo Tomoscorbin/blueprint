@@ -3,50 +3,93 @@
             [clojure.string :as str]
             [kraft.runtime :as runtime]))
 
-(def base-layout
-  {:main       "src/{pkg}/main.py"
-   :readme    "README.md"
-   :gitignore ".gitignore"
-   :python-version ".python-version"
-   :pyproject  "pyproject.toml"
-   :pre-commit ".pre-commit-config.yml"
-   :conftest   "tests/conftest.py"})
+(def answers {:project-name "demo"
+              :ci-provider :github
+              :project-type :dabs})
+
+(def ^:private layout-spec
+  {:main            {:destination "src/{pkg}/main.py"
+                     :source "templates/main.py.selmer"}
+   :python-init     {:destination "src/{pkg}/__init__.py"
+                     :source nil}
+   :readme          {:destination "README.md"
+                     :source "templates/readme.md.selmer"}
+   :gitignore       {:destination ".gitignore"
+                     :source "templates/gitignore.selmer"}
+   :python-version  {:destination ".python-version"
+                     :source "templates/python-version.selmer"}
+   :pyproject       {:destination "pyproject.toml"
+                     :source "templates/pyproject.toml.selmer"}
+   :pre-commit      {:destination ".pre-commit-config.yml"
+                     :source "templates/pre-commit-config.yml.selmer"}
+   :conftest        {:destination "tests/conftest.py"
+                     :source "templates/conftest.py.selmer"}
+   :github-ci       {:destination ".github/workflows/ci.yml"
+                     :source "templates/ci/github/ci.yml.selmer"}
+   :github-bump     {:destination ".github/workflows/bump.yml"
+                     :source "templates/ci/bump.yml.selmer"}
+   :azure-ci        {:destination "azure-pipelines.yml"
+                     :source "templates/ci/azure/ci.yml.selmer"}
+   :databricks-yml  {:destination "databricks.yml"
+                     :source "templates/databricks.yml.selmer"}
+   :sample-job      {:destination "resources/sample_job.job.yml"
+                     :source "templates/sample_job.job.yml.selmer"}})
+
+(def ^:private base-layout-keys
+  [:main
+   :python-init
+   :readme
+   :gitignore
+   :python-version
+   :pyproject
+   :pre-commit
+   :conftest])
+
+(defn- base-layout []
+  (select-keys layout-spec base-layout-keys))
 
 (defn- join [root rel]
   (str (io/file root rel)))
 
 (defn- project->pkg [s]
-  (-> s str/trim str/lower-case
+  (-> s
+      str/trim
+      str/lower-case
       (str/replace #"[^a-z0-9_]+" "_")
       (str/replace #"_+" "_")
       (str/replace #"^_+|_+$" "")))
 
 (defn- apply-pkg
-  "Replace {pkg} only in :src."
+  "Replace {pkg} placeholders in :destination for every entry in the layout."
   [layout project-name]
-  (update layout :main #(str/replace % "{pkg}" (project->pkg project-name))))
+  (let [pkg (project->pkg project-name)]
+    (into {}
+          (map (fn [[k spec]]
+                 [k (update spec :destination
+                            #(str/replace % "{pkg}" pkg))]))
+          layout)))
 
 (defn- qualify-layout
-  "Prepend the repo root to every path."
+  "Prepend the repo root to every :destination path."
   [layout root]
-  (into {} (for [[k path] layout]
-             [k (join root path)])))
+  (into {}
+        (map (fn [[k spec]]
+               [k (update spec :destination #(join root %))]))
+        layout))
 
 (defn- choose-ci-layout [{:keys [ci-provider]}]
   (case ci-provider
-    :github {:github-ci ".github/workflows/ci.yml"
-             :github-bump ".github/workflows/bump.yml"}
-    :azure  {:azure-ci "azure-pipelines.yml"}
+    :github (select-keys layout-spec [:github-ci :github-bump])
+    :azure  (select-keys layout-spec [:azure-ci])
     {}))
 
 (defn- choose-project-files [{:keys [project-type]}]
   (case project-type
-    :dabs       {:databricks-yml "databricks.yml"
-                 :sample-job "resources/sample_job.job.yml"}
+    :dabs (select-keys layout-spec [:databricks-yml :sample-job])
     {}))
 
 (defn- compose-layout [answers]
-  (merge base-layout
+  (merge (base-layout)
          (choose-ci-layout answers)
          (choose-project-files answers)))
 

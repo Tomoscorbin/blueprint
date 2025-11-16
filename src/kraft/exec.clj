@@ -2,36 +2,35 @@
   (:require [clojure.java.io :as io]
             [selmer.parser :as selmer]))
 
-(def template-path ;;TODO: move all variables like this to a central place
-  {:main            "templates/main.py.selmer"
-   :readme          "templates/readme.md.selmer"
-   :gitignore       "templates/gitignore.selmer"
-   :conftest        "templates/conftest.py.selmer"
-   :github-ci       "templates/ci/github/ci.yml.selmer"
-   :github-bump     "templates/ci/bump.yml.selmer"
-   :pre-commit      "templates/pre-commit-config.yml.selmer"
-   :azure-ci        "templates/ci/azure/ci.yml.selmer"
-   :pyproject       "templates/pyproject.toml.selmer"
-   :databricks-yml  "templates/databricks.yml.selmer"
-   :sample-job      "templates/sample_job.job.yml.selmer"
-   :python-version  "templates/python-version.selmer"})
-
 (defn- ensure-parent! [^java.io.File f]
   (when-let [p (.getParentFile f)]
     (.mkdirs p)))
 
-(defn- render-template! [path tpl-id data]
-  (let [res (get template-path tpl-id)]
-    (when-not res
-      (throw (ex-info "No template resource for id" {:template-id tpl-id :path path})))
-    (let [out (io/file path)]
-      (ensure-parent! out)
-      (spit out (selmer/render (slurp (io/resource res)) data)))))
+(defn- write-empty-file! [destination]
+  (let [file (io/file destination)]
+    (ensure-parent! file)
+    (spit file "")))
+
+(defn- render-template!
+  "Render a Selmer template resource into the given destination file."
+  [destination template-resource data template-id]
+  (let [resource (io/resource template-resource)]
+    (when-not resource
+      (throw (ex-info "No template resource for id"
+                      {:template-id       template-id
+                       :template-resource template-resource
+                       :destination       destination})))
+    (let [file (io/file destination)]
+      (ensure-parent! file)
+      (spit file (selmer/render (slurp resource) data)))))
 
 (defn execute!
-  "Side-effecting: given a qualified layout {id -> absolute-path} and a data map
-   (e.g., {:project_name \"demo\" :pkg \"demo\"}), create dirs and render files."
+  "Side-effecting: given a qualified layout
+   {id -> {:destination abs-path, :source template-or-nil}}
+   and a data map (e.g., {:project_name \"demo\"}),
+   create dirs and render or touch files."
   [layout data]
-  (doseq [[id path] layout]
-    (render-template! path id data)))
-
+  (doseq [[template-id {:keys [destination source]}] layout]
+    (if source
+      (render-template! destination source data template-id)
+      (write-empty-file! destination))))
