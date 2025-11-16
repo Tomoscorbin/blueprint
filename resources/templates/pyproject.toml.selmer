@@ -7,12 +7,12 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pytest",
-    "ruff",
-    "mypy",
-    "commitizen",
-    "pre-commit",
-    {{ if (= project_type "dabs") }}"databricks-connect"{{ end }},
+  "pytest",
+  "ruff",
+  "mypy",
+  "commitizen",
+  "pre-commit",
+  {{ if (= project_type "dabs") }}"databricks-connect"{{ end }},
 ]
 
 [project.scripts]
