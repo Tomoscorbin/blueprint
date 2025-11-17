@@ -1,5 +1,6 @@
 (ns kraft.plan-test
   (:require
+   [clojure.set :as set]
    [clojure.java.io :as io]
    [clojure.test :refer [deftest is testing]]
    [kraft.plan :as plan]
@@ -74,36 +75,31 @@
 
 (deftest compose-layout-merges-base-ci-and-project-files
   (testing "compose-layout merges base, CI and project-type-specific entries"
-    (let [answers {:ci-provider  :github
-                   :project-type :dabs}
-          layout  (#'plan/compose-layout answers)
-          keys    (set (keys layout))]
+    (let [answers    {:ci-provider  :github
+                      :project-type :dabs}
+          base-keys  (set (keys (#'plan/base-layout)))
+          layout     (#'plan/compose-layout answers)
+          layout-keys (set (keys layout))]
+      (is (set/subset? base-keys layout-keys)
+          "result must include all base layout entries")
+      (is (every? layout-keys [:github-ci :github-bump :databricks-yml :sample-job])
+          "result must include CI + project-type specific entries"))))
 
-      (is (every? keys
-                  [:main :python-init :runtime :readme :gitignore
-                   :python-version :pyproject :pre-commit :conftest
-                   :test-init :test-main :makefile])
-          "base layout keys are present")
-      (is (every? keys [:github-ci :github-bump])
-          "GitHub CI keys are present")
-      (is (every? keys [:databricks-yml :sample-job])
-          "DABS project-type keys are present"))))
-
-(deftest plan-layout-qualifies-all-destinations-with-project-root
+(deftest plan-layout-qualifies-all-destinations
   (testing "plan-layout qualifies every destination with the project root"
-    (let [answers {:project-name "my-project"
+    (let [answers {:project-name "my_project"
                    :ci-provider  :github
                    :project-type :dabs}
           layout  (plan/plan-layout answers)
           readme  (get-in layout [:readme :destination])
           main    (get-in layout [:main :destination])]
 
-      (is (= (str (io/file "my-project" "README.md"))
+      (is (= (str (io/file "my_project" "README.md"))
              readme)
           "README destination is qualified")
-      (is (= (str (io/file "my-project" "src/{pkg}/main.py"))
+      (is (= (str (io/file "my_project" "src/my_project/main.py"))
              main)
-          "main destination is qualified, {pkg} placeholder is preserved"))))
+          "main destination is qualified"))))
 
 (deftest collect-additional-details-delegates-to-runtime-resolvers
   (testing "collect-additional-details calls all runtime resolvers and returns their values"

@@ -137,6 +137,7 @@
   [answers]
   (let [root (:project-name answers)]
     (-> (compose-layout answers)
+        (apply-pkg-placeholder root)
         (qualify-layout root))))
 
 (defn collect-additional-details
