@@ -32,7 +32,7 @@
                      :source "templates/ci/github/ci.yml.selmer"}
    :github-bump     {:destination ".github/workflows/bump.yml"
                      :source "templates/ci/bump.yml.selmer"}
-   :azure-ci        {:destination "azure-pipelines.yml"
+   :azure-ci        {:destination ".azure/ci.yml"
                      :source "templates/ci/azure/ci.yml.selmer"}
    :databricks-yml  {:destination "databricks.yml"
                      :source "templates/databricks.yml.selmer"}

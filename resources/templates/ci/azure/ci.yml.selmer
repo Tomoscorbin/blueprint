@@ -73,13 +73,14 @@ stages:
           - script: make build
             displayName: "Build wheel"
 
-
       - job: bundle
         displayName: "Validate bundle"
-      - script: |
-          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
-          databricks bundle validate
-        env:
-          DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
-          DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
+        steps:
+          - script: |
+              curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+              databricks bundle validate
+            displayName: "Validate bundle"
+            env:
+              DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+              DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
 
