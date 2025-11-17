@@ -1,5 +1,9 @@
+# Only runs on PRs that target `main`
 name: CI
-on: [pull_request]
+on:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   lint:
