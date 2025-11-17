@@ -1,71 +1,85 @@
-# Only runs on pull requests that 
-# Only runs on pull requests that target `main`
-# We use uv to dynamically apply the python version in .python-version
+# Only run for PRs targeting main
 trigger: none
-
 pr:
   branches:
     include:
       - main
 
 pool:
-  vmImage: "ubuntu-latest"
+  vmImage: 'ubuntu-latest'
 
-jobs:
-  - job: CI
+stages:
+  - stage: CI
     displayName: "CI"
-    steps:
-      - checkout: self
+    jobs:
 
-      # Install uv
-      - script: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-        displayName: "Install uv"
+      # -------- Lint --------
+      - job: lint
+        displayName: "Run linter"
+        steps:
+          - checkout: self
 
-      # Create venv & sync all dependency groups from pyproject.toml
-      - script: |
-          uv venv
-          uv sync --all-groups
-        displayName: "Create & sync venv with uv"
+          - script: pip install uv
+            displayName: "Install uv"
 
-      # Lint
-      - script: |
-          uv run ruff check .
-        displayName: "Lint"
+          - script: make init
+            displayName: "Initialise environment"
 
-      # Type-check
-      - script: |
-          uv run mypy .
-        displayName: "Type-check"
+          - script: make lint
+            displayName: "Run linter"
 
-      # Tests
-      - script: |
-          uv run pytest --junitxml=reports/test-results.xml
-        displayName: "Run tests"
+      # -------- Types --------
+      - job: types
+        displayName: "Run type checker"
+        steps:
+          - checkout: self
 
-      - task: PublishTestResults@2
-        displayName: "Publish test results"
-        inputs:
-          testResultsFiles: "reports/test-results.xml"
-          testRunTitle: "PyTest Results"
-      {% if project_type = "dabs" %}
-      # Install Databricks CLI & validate bundle
+          - script: pip install uv
+            displayName: "Install uv"
+
+          - script: make init
+            displayName: "Initialise environment"
+
+          - script: make types
+            displayName: "Run type checker"
+
+      # -------- Tests --------
+      - job: tests
+        displayName: "Run unit tests"
+        steps:
+          - checkout: self
+
+          - script: pip install uv
+            displayName: "Install uv"
+
+          - script: make init
+            displayName: "Initialise environment"
+
+          - script: make test
+            displayName: "Run tests"
+
+      # -------- Wheel build --------
+      - job: wheel
+        displayName: "Build wheel"
+        steps:
+          - checkout: self
+
+          - script: pip install uv
+            displayName: "Install uv"
+
+          - script: make init
+            displayName: "Initialise environment"
+
+          - script: make build
+            displayName: "Build wheel"
+
+
+      - job: bundle
+        displayName: "Validate bundle"
       - script: |
           curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
           databricks bundle validate
-        displayName: "Validate bundle"
         env:
           DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
           DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
-      {% endif %}
-      # Build wheel {% if project_type = "dabs" %}(just to catch packaging issues){% endif %}
-      - script: |
-        uv build displayName: "Build wheel"
-      {% if project_type = "python-lib" %}
-      - task: publishbuildartifacts@1
-        inputs:
-          pathtopublish: "$(build.sourcesdirectory)/dist"
-          artifactname: "dist"
-          publishlocation: "container"
-        displayname: "publish wheel artefacts"
-      {% endif %}
+
