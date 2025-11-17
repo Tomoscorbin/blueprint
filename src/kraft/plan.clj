@@ -48,9 +48,11 @@
    :github-ci       {:destination ".github/workflows/ci.yml"
                      :source "templates/ci/github/ci.yml.selmer"}
    :github-bump     {:destination ".github/workflows/bump.yml"
-                     :source "templates/ci/bump.yml.selmer"}
+                     :source "templates/ci/github/bump.yml.selmer"}
    :azure-ci        {:destination ".azure/ci.yml"
                      :source "templates/ci/azure/ci.yml.selmer"}
+   :azure-bump      {:destination ".azure/bump.yml"
+                     :source "templates/ci/azure/bump.yml.selmer"}
    :databricks-yml  {:destination "databricks.yml"
                      :source "templates/databricks.yml.selmer"}
    :sample-job      {:destination "resources/sample_job.job.yml"
@@ -109,7 +111,7 @@
   [{:keys [ci-provider]}]
   (case ci-provider
     :github (select-keys layout-spec [:github-ci :github-bump])
-    :azure  (select-keys layout-spec [:azure-ci])))
+    :azure  (select-keys layout-spec [:azure-ci :azure-bump])))
 
 (defn- choose-project-files
   "Return additional layout entries based on `:project-type` in `answers`.

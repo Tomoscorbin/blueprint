@@ -1,0 +1,41 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pr: none
+
+pool:
+  vmImage: "ubuntu-latest"
+
+jobs:
+  - job: bump_version
+    displayName: "Bump version"
+    # Skip if the commit message starts with "bump:"
+    condition: |
+      and(
+        eq(variables['Build.SourceBranchName'], 'main'),
+        ne(startsWith(variables['Build.SourceVersionMessage'], 'bump: '), true)
+      )
+    steps:
+      - checkout: self
+        persistCredentials: true
+        fetchDepth: 0
+        fetchTags: true
+
+      - script: pip install commitizen
+        displayName: "Install Commitizen"
+
+      - script: |
+          set -e
+
+          git checkout main
+          git config user.name "Bump Bot"
+          git config user.email "bump@hotmail.com"
+
+          cz bump --yes --changelog
+
+          # Push commit + tags back to the repo
+          git push origin main
+          git push --tags
+        displayName: "Bump version and push"
