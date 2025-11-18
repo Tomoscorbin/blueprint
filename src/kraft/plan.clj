@@ -54,7 +54,7 @@
    :azure-bump      {:destination ".azure/bump.yaml"
                      :source "templates/ci/azure/bump.yaml.selmer"}
    :databricks-yaml  {:destination "databricks.yaml"
-                     :source "templates/databricks.yaml.selmer"}
+                      :source "templates/databricks.yaml.selmer"}
    :sample-job      {:destination "resources/sample_job.job.yaml"
                      :source "templates/sample_job.job.yaml.selmer"}})
 
@@ -120,7 +120,10 @@
   - :dabs -> Databricks bundle files (databricks.yaml + sample job)"
   [{:keys [project-type]}]
   (case project-type
-    :dabs (select-keys layout-spec [:databricks-yaml :sample-job])))
+    :dabs (select-keys layout-spec [:databricks-yaml :sample-job])
+    {}))
+
+(select-keys layout-spec [])
 
 (defn- compose-layout
   "Build the full layout specification (still with relative paths and `{pkg}`).
