@@ -63,7 +63,7 @@
   (testing "choose-ci-layout returns Azure CI entry for :azure"
     (let [answers  {:ci-provider :azure}
           ci-layout (#'plan/choose-ci-layout answers)]
-      (is (= #{:azure-ci}
+      (is (= #{:azure-ci :azure-bump}
              (set (keys ci-layout)))))))
 
 (deftest choose-project-files-adds-dabs-files
