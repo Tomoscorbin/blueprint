@@ -1,7 +1,11 @@
 (ns kraft.tui.menu
   "Inline arrow-key menu rendered directly to the terminal using ANSI escape codes
    and JLine for raw input."
-  (:import [org.jline.terminal TerminalBuilder]))
+  (:import [org.jline.terminal TerminalBuilder Terminal]))
+
+(def ^:private ^Terminal terminal
+  (delay
+    (.build (TerminalBuilder/builder))))
 
 (def ^:private esc "\u001b[")
 
@@ -89,18 +93,17 @@
   (validate-options! options)
   (let [opts  (vec options)
         lines (inc (count opts))       ; blank line + options
-        term  (.build (TerminalBuilder/builder))
-        rdr   (.reader term)]
+        term  ^Terminal @terminal
+        rdr   (.reader term)
+        prev-attr (.enterRawMode term)]
     (try
-      (.enterRawMode term)
-
       ;; initial render
       (save-cursor!)
 
       ;; render menu with first option selected
       (render-options-block! opts 0)
 
-      ;; park cursor after block (so later typing doesn't overwrite it)
+      ;; park cursor after block so later typing doesn't overwrite it
       (goto-line! (inc lines))
       (println)
       (flush)
@@ -133,10 +136,12 @@
                 ;; not an ESC-[ sequence, ignore
                 (recur idx)))
 
-            ;; all other keys: ignore and keep current selection
+            ;; ignore all other keys and keep current selection
             :else
             (recur idx))))
       (finally
         (delete-options-block! lines)
-        (.close rdr)
-        (.close term)))))
+        ;; restore cooked mode
+        (.setAttributes term prev-attr)
+        (.close rdr)))))
+
