@@ -48,13 +48,14 @@
     (runtime-python-version)))
 
 (defn resolve-requires-python
-  "Return the 'requires-python' string for DABs projects.
+  "Return the 'requires-python' string for recognised project types.
 
-  For project-type :dabs, this returns the value from the Databricks runtime
-  manifest."
+  - For project-type :dabs, this returns the value from the Databricks runtime
+    manifest.
+  - For project-type :python-lib, this returns the library-level constraint."
   [{:keys [project-type]}]
   (case project-type
-    :dabs (runtime-requires-python)
+    :dabs       (runtime-requires-python)
     :python-lib lib-requires-python))
 
 (defn resolve-databricks-runtime

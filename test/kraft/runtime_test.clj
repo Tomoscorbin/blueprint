@@ -30,19 +30,27 @@
              (runtime/resolve-python-version {}))
           "missing project-type defaults to the runtime Python version"))))
 
-(deftest resolve-requires-python-only-for-dabs-projects
-  (testing "resolve-requires-python returns a value only for :dabs projects"
+(deftest resolve-requires-python-for-supported-project-types
+  (testing "resolve-requires-python returns constraints for :dabs and :python-lib, and throws otherwise"
     (with-redefs [runtime/runtime-requires-python
-                  (fn [] ">=3.12,<3.13")]
+                  (fn [] ">=3.12,<3.13")
+                  runtime/lib-requires-python
+                  ">=3.14"]
       (is (= ">=3.12,<3.13"
              (runtime/resolve-requires-python {:project-type :dabs}))
           ":dabs projects get the requires-python constraint from the manifest")
-      (is (nil?
-           (runtime/resolve-requires-python {:project-type :python-lib}))
-          "non-dabs projects do not have a requires-python constraint")
-      (is (nil?
-           (runtime/resolve-requires-python {}))
-          "missing project-type also yields no requires-python constraint"))))
+
+      (is (= ">=3.14"
+             (runtime/resolve-requires-python {:project-type :python-lib}))
+          ":python-lib projects get the library requires-python constraint")
+
+      (is (thrown? IllegalArgumentException
+                   (runtime/resolve-requires-python {:project-type :something-else}))
+          "unsupported project types cause an IllegalArgumentException")
+
+      (is (thrown? IllegalArgumentException
+                   (runtime/resolve-requires-python {}))
+          "missing project-type also causes an IllegalArgumentException"))))
 
 (deftest resolve-databricks-runtime-only-for-dabs-projects
   (testing "resolve-databricks-runtime returns a version only for :dabs projects"
