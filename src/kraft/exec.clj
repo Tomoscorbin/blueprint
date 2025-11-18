@@ -3,8 +3,9 @@
   (:require [clojure.java.io :as io]
             [selmer.parser :as selmer]))
 
-(defn- ensure-parent! [^java.io.File f]
+(defn- ensure-parent!
   "Ensure that the parent directory of `f` exists, creating it if necessary."
+  [^java.io.File f]
   (when-let [p (.getParentFile f)]
     (.mkdirs p)))
 
