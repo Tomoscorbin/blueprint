@@ -1,8 +1,10 @@
 (ns kraft.exec
+  "Execute a planned layout by creating directories and writing files."
   (:require [clojure.java.io :as io]
             [selmer.parser :as selmer]))
 
 (defn- ensure-parent! [^java.io.File f]
+  "Ensure that the parent directory of `f` exists, creating it if necessary."
   (when-let [p (.getParentFile f)]
     (.mkdirs p)))
 
