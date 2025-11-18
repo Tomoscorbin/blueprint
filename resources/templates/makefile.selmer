@@ -55,7 +55,7 @@ lint: ruff types
 # ----------------------------------------------------------------------
 .PHONY: test
 test:
-	uv run pytest -q
+	uv run pytest
 
 # If you decide to split tests later:
 #.PHONY: test-unit
