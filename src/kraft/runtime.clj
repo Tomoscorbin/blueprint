@@ -6,6 +6,7 @@
 
 (def ^:private databricks-runtime-resource "databricks_runtime.edn")
 (def ^:private python-lib-version "3.14")
+(def ^:private  lib-requires-python ">=3.14")
 
 (defn- load-runtime-manifest
   "Load the Databricks runtime manifest EDN from the classpath.
@@ -52,8 +53,9 @@
   For project-type :dabs, this returns the value from the Databricks runtime
   manifest."
   [{:keys [project-type]}]
-  (when (= :dabs project-type)
-    (runtime-requires-python)))
+  (case project-type
+    :dabs (runtime-requires-python)
+    :python-lib lib-requires-python))
 
 (defn resolve-databricks-runtime
   "Return the Databricks runtime version string (for example \"17.3\") for DABs projects."
