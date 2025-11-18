@@ -80,68 +80,69 @@
 
 ;; --- Public menu -----------------------------------------------------------
 
+(defn- run-menu-loop
+  "Core menu loop: reads key codes via `read-ch`, tracks selected index,
+  calls `render!` whenever the selection changes, and returns the selected key
+  when Enter is pressed.
+
+  `opts` must be a vector of [key label] pairs."
+  [opts read-ch render!]
+  (loop [idx 0]
+    (let [ch (read-ch)]
+      (cond
+        ;; Enter: return key of current option
+        (= ch 13)
+        (first (nth opts idx))
+
+        ;; ESC [ A/B (arrow keys)
+        (= ch 27)
+        (let [c2 (read-ch)]
+          (if (= c2 91)
+            (let [c3 (read-ch)]
+              (case c3
+                ;; up
+                65 (let [new (max 0 (dec idx))]
+                     (when (not= new idx)
+                       (render! new))
+                     (recur new))
+                ;; down
+                66 (let [new (min (dec (count opts)) (inc idx))]
+                     (when (not= new idx)
+                       (render! new))
+                     (recur new))
+                ;; unknown escape sequence: ignore
+                (recur idx)))
+            ;; not an ESC-[ sequence: ignore
+            (recur idx)))
+
+        ;; all other keys ignore and keep current selection
+        :else
+        (recur idx)))))
+
 (defn create-menu!
-  "Inline menu. Arrow up/down to move, Enter to select.
-
-  `options` must be a non-empty sequence of [key label] pairs, where:
-    - key   is a keyword (returned from this function)
-    - label is a string displayed in the menu.
-
-  Returns:
-    The selected key (a keyword)."
   [options]
   (validate-options! options)
-  (let [opts  (vec options)
-        lines (inc (count opts))       ; blank line + options
-        term  ^Terminal @terminal
-        rdr   (.reader term)
+  (let [opts      (vec options)
+        lines     (inc (count opts))       ; blank line + options
+        ^Terminal term @terminal
+        rdr       (.reader term)
         prev-attr (.enterRawMode term)]
     (try
       ;; initial render
       (save-cursor!)
-
-      ;; render menu with first option selected
       (render-options-block! opts 0)
-
-      ;; park cursor after block so later typing doesn't overwrite it
       (goto-line! (inc lines))
       (println)
       (flush)
 
-      (loop [idx 0]
-        (let [ch (.read rdr)]
-          (cond
-            ;; Enter
-            (= ch 13)
-            (first (nth opts idx))
+      ;; delegate to pure-ish loop
+      (let [read-ch (fn [] (.read rdr))
+            render! (fn [selected-idx]
+                      (render-options-block! opts selected-idx))]
+        (run-menu-loop opts read-ch render!))
 
-            ;; ESC [ A/B (arrow keys)
-            (= ch 27)
-            (let [c2 (.read rdr)]
-              (if (= c2 91)
-                (let [c3 (.read rdr)]
-                  (case c3
-                    ;; up
-                    65 (let [new (max 0 (dec idx))]
-                         (when (not= new idx)
-                           (render-options-block! opts new))
-                         (recur new))
-                    ;; down
-                    66 (let [new (min (dec (count opts)) (inc idx))]
-                         (when (not= new idx)
-                           (render-options-block! opts new))
-                         (recur new))
-                    ;; unknown escape sequence, ignore
-                    (recur idx)))
-                ;; not an ESC-[ sequence, ignore
-                (recur idx)))
-
-            ;; ignore all other keys and keep current selection
-            :else
-            (recur idx))))
       (finally
         (delete-options-block! lines)
-        ;; restore cooked mode
         (.setAttributes term prev-attr)
         (.close rdr)))))
 
