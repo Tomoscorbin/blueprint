@@ -70,7 +70,7 @@
   (testing "choose-project-files returns Databricks bundle files for :dabs"
     (let [answers {:project-type :dabs}
           project-layout (#'plan/choose-project-files answers)]
-      (is (= #{:databricks-yml :sample-job}
+      (is (= #{:databricks-yaml :sample-job}
              (set (keys project-layout)))))))
 
 (deftest compose-layout-merges-base-ci-and-project-files
@@ -82,7 +82,7 @@
           layout-keys (set (keys layout))]
       (is (set/subset? base-keys layout-keys)
           "result must include all base layout entries")
-      (is (every? layout-keys [:github-ci :github-bump :databricks-yml :sample-job])
+      (is (every? layout-keys [:github-ci :github-bump :databricks-yaml :sample-job])
           "result must include CI + project-type specific entries"))))
 
 (deftest plan-layout-qualifies-all-destinations

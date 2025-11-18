@@ -35,8 +35,8 @@
                      :source "templates/python-version.selmer"}
    :pyproject       {:destination "pyproject.toml"
                      :source "templates/pyproject.toml.selmer"}
-   :pre-commit      {:destination ".pre-commit-config.yml"
-                     :source "templates/pre-commit-config.yml.selmer"}
+   :pre-commit      {:destination ".pre-commit-config.yaml"
+                     :source "templates/pre-commit-config.yaml.selmer"}
    :conftest        {:destination "tests/conftest.py"
                      :source "templates/conftest.py.selmer"}
    :test-init       {:destination "tests/__init__.py"
@@ -45,18 +45,18 @@
                      :source "templates/test_main.py.selmer"}
    :makefile        {:destination "Makefile"
                      :source "templates/makefile.selmer"}
-   :github-ci       {:destination ".github/workflows/ci.yml"
-                     :source "templates/ci/github/ci.yml.selmer"}
-   :github-bump     {:destination ".github/workflows/bump.yml"
-                     :source "templates/ci/github/bump.yml.selmer"}
-   :azure-ci        {:destination ".azure/ci.yml"
-                     :source "templates/ci/azure/ci.yml.selmer"}
-   :azure-bump      {:destination ".azure/bump.yml"
-                     :source "templates/ci/azure/bump.yml.selmer"}
-   :databricks-yml  {:destination "databricks.yml"
-                     :source "templates/databricks.yml.selmer"}
-   :sample-job      {:destination "resources/sample_job.job.yml"
-                     :source "templates/sample_job.job.yml.selmer"}})
+   :github-ci       {:destination ".github/workflows/ci.yaml"
+                     :source "templates/ci/github/ci.yaml.selmer"}
+   :github-bump     {:destination ".github/workflows/bump.yaml"
+                     :source "templates/ci/github/bump.yaml.selmer"}
+   :azure-ci        {:destination ".azure/ci.yaml"
+                     :source "templates/ci/azure/ci.yaml.selmer"}
+   :azure-bump      {:destination ".azure/bump.yaml"
+                     :source "templates/ci/azure/bump.yaml.selmer"}
+   :databricks-yaml  {:destination "databricks.yaml"
+                     :source "templates/databricks.yaml.selmer"}
+   :sample-job      {:destination "resources/sample_job.job.yaml"
+                     :source "templates/sample_job.job.yaml.selmer"}})
 
 (def ^:private base-layout-keys
   "Layout entries that are always created, regardless of CI provider or project type."
@@ -117,10 +117,10 @@
   "Return additional layout entries based on `:project-type` in `answers`.
 
   Allowed poject types:
-  - :dabs -> Databricks bundle files (databricks.yml + sample job)"
+  - :dabs -> Databricks bundle files (databricks.yaml + sample job)"
   [{:keys [project-type]}]
   (case project-type
-    :dabs (select-keys layout-spec [:databricks-yml :sample-job])))
+    :dabs (select-keys layout-spec [:databricks-yaml :sample-job])))
 
 (defn- compose-layout
   "Build the full layout specification (still with relative paths and `{pkg}`).
