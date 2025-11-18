@@ -1,47 +1,99 @@
-
 (ns kraft.tui.menu
+  "Inline arrow-key menu rendered directly to the terminal using ANSI escape codes
+   and JLine for raw input."
   (:import [org.jline.terminal TerminalBuilder]))
-;;TODO: if I enter the first question too fast (project name), the menu reprints on each arrow key
+
 ;; --- ANSI helpers ----------------------------------------------------------
+
 (def ^:private esc "\u001b[")
 
 (defn- save-cursor!    [] (print (str esc "s")) (flush))
 (defn- restore-cursor! [] (print (str esc "u")) (flush))
 (defn- clear-line!     [] (print (str esc "2K")) (flush))
-(defn- goto-line!      [n] ; 1-based, from saved cursor
-  (restore-cursor!)
-  (when (> n 1) (print (str esc (dec n) "E")))
-  (flush))
-(defn- hide-cursor! [] (print (str esc "?25l")) (flush))
-(defn- show-cursor! [] (print (str esc "?25h")))
-(defn- green-bold [s] (str esc "1;32m" s esc "0m"))
 
-(defn- print-option! [opt selected?]
+(defn- goto-line!
+  "Move the cursor to line `n` relative to the saved cursor position.
+   Lines are 1-based, so n=1 means 'saved cursor line'."
+  [n]
+  (restore-cursor!)
+  (when (> n 1)
+    ;; 'E' moves down by the given number of lines, to column 1.
+    (print (str esc (dec n) "E")))
+  (flush))
+
+(defn- hide-cursor! [] (print (str esc "?25l")) (flush))
+(defn- show-cursor! [] (print (str esc "?25h")) (flush))
+
+(defn- green-bold [s]
+  (str esc "1;32m" s esc "0m"))
+
+(defn- print-option!
+  "Print a single menu option line at the current cursor position,
+   clearing the line first and applying highlighting if selected."
+  [label selected?]
   (clear-line!)
   (if selected?
-    (println (str "▶ " (green-bold opt)))
-    (println opt))) ; no indent on unselected
+    (println (str "▶ " (green-bold label)))
+    (println label))) ; no indent on unselected
 
-(defn- delete-options-block! [n]
+(defn- delete-options-block!
+  "Delete `n` lines of menu output starting from the first option line
+   (relative to the saved cursor)."
+  [n]
   ;; go to first option line relative to saved cursor, then delete n lines
   (goto-line! 2)
   (print (str esc n "M")) ; CSI n M  (DL = Delete Line)
   (flush))
 
+;; --- Validation ------------------------------------------------------------
+
+(defn- valid-option?
+  "Return true if x is a [keyword label] pair."
+  [x]
+  (and (vector? x)
+       (= 2 (count x))
+       (keyword? (first x))
+       (string? (second x))))
+
+(defn- validate-options!
+  "Ensure options is a non-empty sequence of [keyword label] pairs."
+  [options]
+  (when (or (not (sequential? options))
+            (empty? options)
+            (not (every? valid-option? options)))
+    (throw (ex-info "options must be a non-empty sequence of [keyword label] pairs"
+                    {:options options})))
+  options)
+
+;; --- Rendering -------------------------------------------------------------
+
+(defn- render-options-block!
+  "Render the full options block starting from the saved cursor.
+
+  `opts` is a vector of [key label] pairs.
+  `selected-idx` is the index of the currently selected option."
+  [opts selected-idx]
+  ;; first option line is 2 lines below saved cursor (blank line between prompt and menu)
+  (goto-line! 2)
+  (doseq [[i [_ label]] (map-indexed vector opts)]
+    (print-option! label (= i selected-idx)))
+  (flush))
+
+;; --- Public menu -----------------------------------------------------------
+
 (defn create-menu!
   "Inline menu. Arrow up/down to move, Enter to select.
-   `options` must be a vector of [key label]. Returns the selected key-value pair as a map."
-  [options]
-  (when (or (not (sequential? options)) (empty? options)
-            (not (every? (fn [x] (and (vector? x)
-                                      (= 2 (count x))
-                                      (keyword? (first x))
-                                      (string? (second x))))
-                         options)))
-    (throw (ex-info "options must be a vector of [keyword label] pairs" {:options options})))
 
+  `options` must be a non-empty sequence of [key label] pairs, where:
+    - key   is a keyword (returned from this function)
+    - label is a string displayed in the menu.
+
+  Returns:
+    The selected key (a keyword)."
+  [options]
+  (validate-options! options)
   (let [opts  (vec options)
-        lines (inc (count opts))
+        lines (inc (count opts))       ; blank line + options
         term  (.build (TerminalBuilder/builder))
         rdr   (.reader term)]
     (try
@@ -50,39 +102,49 @@
       ;; initial render
       (hide-cursor!)
       (save-cursor!)
-      (goto-line! 1)
-      (doseq [[i [_ label]] (map-indexed vector opts)]
-        (goto-line! (+ 2 i)) (print-option! label (= i 0)))
-      ;; park cursor after block (so typing later doesn't overwrite it)
-      (goto-line! (inc lines)) (println) (flush)
+
+      ;; render menu with first option selected
+      (render-options-block! opts 0)
+
+      ;; park cursor after block (so later typing doesn't overwrite it)
+      (goto-line! (inc lines))
+      (println)
+      (flush)
 
       (loop [idx 0]
         (let [ch (.read rdr)]
           (cond
-            (= ch 13)                             ; Enter
+            ;; Enter
+            (= ch 13)
             (first (nth opts idx))
 
-            (= ch 27)                             ; ESC [ A/B
+            ;; ESC [ A/B (arrow keys)
+            (= ch 27)
             (let [c2 (.read rdr)]
               (if (= c2 91)
                 (let [c3 (.read rdr)]
                   (case c3
-                    65 (let [new (max 0 (dec idx))] ; up
+                    ;; up
+                    65 (let [new (max 0 (dec idx))]
                          (when (not= new idx)
-                           (goto-line! (+ 2 idx)) (print-option! (second (nth opts idx)) false)
-                           (goto-line! (+ 2 new)) (print-option! (second (nth opts new)) true))
+                           (render-options-block! opts new))
                          (recur new))
-                    66 (let [new (min (dec (count opts)) (inc idx))] ; down
+                    ;; down
+                    66 (let [new (min (dec (count opts)) (inc idx))]
                          (when (not= new idx)
-                           (goto-line! (+ 2 idx)) (print-option! (second (nth opts idx)) false)
-                           (goto-line! (+ 2 new)) (print-option! (second (nth opts new)) true))
+                           (render-options-block! opts new))
                          (recur new))
+                    ;; unknown escape sequence, ignore
                     (recur idx)))
+                ;; not an ESC-[ sequence, ignore
                 (recur idx)))
 
-            :else (recur idx))))
+            ;; all other keys: ignore and keep current selection
+            :else
+            (recur idx))))
       (finally
         (delete-options-block! lines)
         (show-cursor!)
         (.close rdr)
         (.close term)))))
+
