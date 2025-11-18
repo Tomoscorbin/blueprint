@@ -27,7 +27,7 @@ jobs:
       - run: make types
 
   tests:
-    name "Run unit tests"
+    name: "Run unit tests"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -37,7 +37,7 @@ jobs:
       - run: make test
 
   wheel:
-    run: "Build wheel"
+    name: "Build wheel"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -45,7 +45,7 @@ jobs:
       - run: pip install uv
       - run: make init
       - run: make build
-
+{% if project_type = :dabs %}
   bundle:
     name: "Validate bundle"
     runs-on: ubuntu-latest
@@ -56,4 +56,4 @@ jobs:
       - uses: actions/checkout@v3
       - uses: databricks/setup-cli@main
       - run: databricks bundle validate
-
+{% endif %}
