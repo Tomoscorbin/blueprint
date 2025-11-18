@@ -120,6 +120,18 @@
         (recur idx)))))
 
 (defn create-menu!
+  "Render an inline arrow-key menu.
+  - Renders `options` as a vertical list, with one item highlighted at a time.
+  - Up/down arrow keys move the highlighted selection.
+  - Pressing Enter returns the key of the currently selected option.
+
+  Parameters:
+  - `options`: a non-empty sequence of [key label] pairs, where:
+      * key   is a keyword (the value returned from this function)
+      * label is a string shown to the user.
+
+  Returns:
+  - The selected key (a keyword)."
   [options]
   (validate-options! options)
   (let [opts      (vec options)
