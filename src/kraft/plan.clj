@@ -1,9 +1,5 @@
 (ns kraft.plan
-  "Plan the on-disk layout for a new project.
-
-  Public API:
-  - `plan-layout`: build the full layout of files to create.
-  - `collect-additional-details`: derive extra values shared across templates."
+  "Plan the on-disk layout for a new project."
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [kraft.runtime :as runtime]))
@@ -145,10 +141,24 @@
         (apply-pkg-placeholder root)
         (qualify-layout root))))
 
-(defn collect-additional-details
+(defn- collect-additional-details
   "Derived properties shared across templates."
   [answers]
   {:python_version_value (runtime/resolve-python-version answers)
    :requires_python_value (runtime/resolve-requires-python answers)
    :databricks_runtime (runtime/resolve-databricks-runtime answers)})
 
+(defn template-data
+  "Build the full Selmer template data map from the user's answers.
+
+  Combines:
+  - the raw answers map
+  - normalised keys expected by templates
+  - derived runtime-related values."
+  [answers]
+  (merge answers
+         {:project_name    (:project-name answers)
+          :ci_provider     (:ci-provider answers)
+          :project_type    (:project-type answers)
+          :databricks_host (:hostname answers)}
+         (collect-additional-details answers)))

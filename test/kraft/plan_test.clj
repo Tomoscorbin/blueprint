@@ -117,7 +117,7 @@
                     (fn [a]
                       (swap! calls conj [:databricks-runtime a])
                       "Databricks Runtime 17.3 LTS")]
-        (let [result (plan/collect-additional-details answers)]
+        (let [result (#'plan/collect-additional-details answers)]
 
           (is (= {:python_version_value  "3.12.3"
                   :requires_python_value ">=3.12,<3.13"
