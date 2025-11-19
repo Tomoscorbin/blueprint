@@ -14,4 +14,6 @@
                 "--middleware" "[cider.nrepl/cider-middleware]"
                 "--interactive"]}
   :test {:extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}}
-         :main-opts ["-m" "kaocha.runner"]}}}
+         :main-opts ["-m" "kaocha.runner"]}
+  :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.11"}}
+          :ns-default build}}}
