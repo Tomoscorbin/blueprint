@@ -1,26 +1,36 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Repo coordinates
 REPO="tomoscorbin/blueprint"
-
-# Command name the user will type
 BINARY_NAME="bp"
 
-# Name of the jar asset attached to each release
-JAR_NAME="blueprint-standalone.jar"
+echo "Installing ${BINARY_NAME} ..."
 
-# Where to store the jar on disk
-JAR_DIR="${BP_JAR_DIR:-$HOME/.local/share/blueprint}"
+# 1. Detect OS
+uname_os="$(uname -s)"
+case "$uname_os" in
+  Linux)  os="linux" ;;
+  Darwin) os="macos" ;;
+  *)
+    echo "Unsupported OS: $uname_os" >&2
+    exit 1
+    ;;
+esac
 
-# Where to put the bp launcher script
-DEFAULT_BIN_DIR="/usr/local/bin"
-FALLBACK_BIN_DIR="$HOME/.local/bin"
-BIN_DIR="${BP_BIN_DIR:-$DEFAULT_BIN_DIR}"
+# 2. Detect arch (simple version: x86_64 only)
+uname_arch="$(uname -m)"
+case "$uname_arch" in
+  x86_64|amd64) arch="amd64" ;;
+  *)
+    echo "Unsupported architecture: $uname_arch" >&2
+    echo "Right now only x86_64/amd64 builds are published." >&2
+    exit 1
+    ;;
+esac
 
-echo "Installing blueprintDE CLI (${BINARY_NAME})..."
+ASSET_NAME="${BINARY_NAME}-${os}-${arch}"
 
-# 1. Determine version/tag to install
+# 3. Resolve version/tag
 VERSION="${BP_VERSION:-latest}"
 
 if [ "$VERSION" = "latest" ]; then
@@ -41,55 +51,43 @@ if [ -z "${TAG:-}" ]; then
 fi
 
 echo "Using release tag: ${TAG}"
+DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${TAG}/${ASSET_NAME}"
 
-# 2. Download the jar asset for that tag
-DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${TAG}/${JAR_NAME}"
-TMP_JAR="$(mktemp)"
+# 4. Download to temp file
+TMP_BIN="$(mktemp)"
+echo "Downloading ${DOWNLOAD_URL} ..."
+curl -fsSL "${DOWNLOAD_URL}" -o "${TMP_BIN}"
+chmod +x "${TMP_BIN}"
 
-echo "Downloading ${DOWNLOAD_URL}..."
-curl -fsSL "${DOWNLOAD_URL}" -o "${TMP_JAR}"
+# 5. Choose install dir (prefer ~/.local/bin if on PATH)
+USER_BIN="$HOME/.local/bin"
+SYSTEM_BIN="/usr/local/bin"
 
-mkdir -p "${JAR_DIR}"
-JAR_PATH="${JAR_DIR}/${JAR_NAME}"
-
-mv "${TMP_JAR}" "${JAR_PATH}"
-
-echo "Jar installed to ${JAR_PATH}"
-
-# 3. Decide where to put the launcher script
-if [ ! -d "${BIN_DIR}" ]; then
-  echo "Bin dir ${BIN_DIR} does not exist."
-  echo "Trying fallback ${FALLBACK_BIN_DIR}..."
-  BIN_DIR="${FALLBACK_BIN_DIR}"
+if [ -n "${BP_BIN_DIR:-}" ]; then
+  BIN_DIR="${BP_BIN_DIR}"
+else
+  if echo ":$PATH:" | tr ':' '\n' | grep -qx "${USER_BIN}"; then
+    BIN_DIR="${USER_BIN}"
+  else
+    BIN_DIR="${SYSTEM_BIN}"
+  fi
 fi
 
 mkdir -p "${BIN_DIR}"
 
-LAUNCHER_PATH="${BIN_DIR}/${BINARY_NAME}"
+TARGET="${BIN_DIR}/${BINARY_NAME}"
 
-# 4. Create the bp launcher script
-cat > "${LAUNCHER_PATH}" <<EOF
-#!/usr/bin/env bash
-set -euo pipefail
-
-JAR_PATH="${JAR_PATH}"
-
-if ! command -v java >/dev/null 2>&1; then
-  echo "Error: 'java' is not on PATH. Please install a JDK (e.g. Temurin 21) and try again." >&2
-  exit 1
+# 6. Move into place (sudo only if needed)
+if [ -w "${BIN_DIR}" ]; then
+  mv "${TMP_BIN}" "${TARGET}"
+else
+  echo "Installing to ${TARGET} (may require sudo)..."
+  sudo mv "${TMP_BIN}" "${TARGET}"
 fi
 
-exec java -jar "\${JAR_PATH}" "\$@"
-EOF
-
-chmod +x "${LAUNCHER_PATH}"
-
-echo "Launcher installed to ${LAUNCHER_PATH}"
-
-# 5. Final messages
 echo
-echo "Done."
+echo "Installed ${BINARY_NAME} to ${TARGET}"
 echo "Make sure ${BIN_DIR} is on your PATH."
-echo "Then run:"
+echo "Try:"
 echo "  ${BINARY_NAME} --help"
 echo "  ${BINARY_NAME} new my-project"

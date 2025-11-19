@@ -3,7 +3,8 @@
         selmer/selmer       {:mvn/version "1.12.67"}
         org.jline/jline {:mvn/version "3.30.6"} ;;TODO: do we need to remove any of these?
         org.jline/jline-reader   {:mvn/version "3.30.6"}
-        org.jline/jline-terminal {:mvn/version "3.30.6"}}
+        org.jline/jline-terminal {:mvn/version "3.30.6"}
+        com.github.clj-easy/graal-build-time {:mvn/version "1.0.5"}}
 
  :aliases
  {:run-m {:main-opts ["-m" "blueprint"]}
