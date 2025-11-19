@@ -87,7 +87,3 @@ fi
 
 echo
 echo "Installed ${BINARY_NAME} to ${TARGET}"
-echo "Make sure ${BIN_DIR} is on your PATH."
-echo "Try:"
-echo "  ${BINARY_NAME} --help"
-echo "  ${BINARY_NAME} new my-project"

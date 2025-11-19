@@ -50,6 +50,7 @@ jobs:
             --features=clj_easy.graal_build_time.InitClojureClasses \
             --report-unsupported-elements-at-runtime \
             -H:+ReportExceptionStackTraces \
+            -H:IncludeResources="databricks_runtime.edn" \
             -jar "$JAR_PATH" \
             bp-linux-amd64
           ls -lh bp-linux-amd64
