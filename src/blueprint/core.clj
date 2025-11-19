@@ -52,13 +52,41 @@
         data   (plan/template-data answers)]
     (exec/execute! layout data)))
 
+(defn- print-usage []
+  (println "bp - blueprintDE CLI")
+  (println)
+  (println "Usage:")
+  (println "  bp init            # interactively create a new project")
+  (println "  bp --help   # show this help"))
+
 (defn -main
   "CLI entry point for blueprint.
 
-  Orchestrates the full flow:
-  - Prompt the user for project configuration.
-  - Plan the on-disk layout.
-  - Render and write all files for the new project."
-  [& _args]
-  (-> (prompt-answers!)
-      (generate-project!)))
+  Commands:
+  - `bp init`   → prompt for project config and generate the project
+  - `bp help`   → show usage
+  - `bp`        → show usage and exit non-zero"
+  [& args]
+  (let [[cmd & _] args]
+    (case cmd
+      ;; happy path: bp init
+      "init"
+      (-> (prompt-answers!)
+          (generate-project!))
+
+      ;; help commands
+      "--help"
+      (do (print-usage)
+          (System/exit 0))
+
+      "-h"
+      (do (print-usage)
+          (System/exit 0))
+
+      ;; default / no command / unknown command
+      (do
+        (when cmd
+          (println "Unknown command:" cmd)
+          (println))
+        (print-usage)
+        (System/exit 1)))))
