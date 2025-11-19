@@ -10,6 +10,7 @@
   - `-main` – prompt for answers and generate the project on disk."
   (:gen-class)
   (:require
+   [blueprint.version :as v]
    [blueprint.plan :as plan]
    [blueprint.exec :as exec]
    [blueprint.tui.core :as tui]))
@@ -53,11 +54,15 @@
     (exec/execute! layout data)))
 
 (defn- print-usage []
-  (println "bp - blueprintDE CLI")
+  (println "bp - blueprint CLI")
   (println)
   (println "Usage:")
-  (println "  bp init            # interactively create a new project")
-  (println "  bp --help   # show this help"))
+  (println "  bp init        # interactively create a new project")
+  (println "  bp --version   # show version")
+  (println "  bp --help      # show this help"))
+
+(defn- print-version []
+  (println "bp" v/version))
 
 (defn -main
   "CLI entry point for blueprint.
@@ -73,6 +78,14 @@
       "init"
       (-> (prompt-answers!)
           (generate-project!))
+
+      "--version"
+      (do (print-version)
+          (System/exit 0))
+
+      "-V"
+      (do (print-version)
+          (System/exit 0))
 
       ;; help commands
       "--help"
