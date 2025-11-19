@@ -19,7 +19,6 @@ jobs:
           distribution: "graalvm-community"
           java-version: "21"
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          components: "native-image"
 
       - name: Setup Clojure
         uses: DeLaGuardo/setup-clojure@13.4
@@ -48,8 +47,11 @@ jobs:
             -jar target/*.jar \
             bd-linux-amd64
 
-      - name: Upload native binary
-        uses: actions/upload-artifact@v4
+      - name: Attach binary to GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: bd-linux-amd64
-          path: bd-linux-amd64
+          tag_name: ${{ github.ref_name }}
+          name}: blueprintDE ${{ github.ref_name }}
+          files: bd-linux-amd64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
