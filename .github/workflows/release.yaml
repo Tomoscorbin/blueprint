@@ -1,4 +1,4 @@
-name: Build native Linux binary
+name: Release
 
 on:
   push:
@@ -9,19 +9,18 @@ permissions:
   contents: write
 
 jobs:
-  native-linux:
+  release-uberjar:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup GraalVM (JDK 21 with native-image)
-        uses: graalvm/setup-graalvm@v1
+      - name: Set up JDK
+        uses: actions/setup-java@v4
         with:
-          distribution: "graalvm-community"
+          distribution: temurin
           java-version: "21"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Clojure
         uses: DeLaGuardo/setup-clojure@13.4
@@ -35,26 +34,23 @@ jobs:
             ~/.m2/repository
             ~/.gitlibs
             .cpcache
-          key: cljdeps-${{ hashFiles('deps.edn') }}
+          key: cljdeps-${{ runner.os }}-${{ hashFiles('deps.edn') }}
           restore-keys: cljdeps-
 
       - name: Build uberjar
         run: clojure -T:build uber
 
-      - name: Build native image
+      - name: Rename uberjar to a stable name
         run: |
-          ls target
-          native-image \
-            --no-fallback \
-            --report-unsupported-elements-at-runtime \
-            -jar target/*.jar \
-            bp-linux-amd64
+          JAR_PATH=$(echo target/*-standalone.jar)
+          mv "$JAR_PATH" blueprint-standalone.jar
+          ls -lh blueprint-standalone.jar
 
-      - name: Attach binary to GitHub Release
+      - name: Attach uberjar to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: blueprintDE ${{ github.ref_name }}
-          files: bp-linux-amd64
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files: blueprint-standalone.jar
+          generate_release_notes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
