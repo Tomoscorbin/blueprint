@@ -21,7 +21,7 @@ jobs:
         with:
           distribution: "graalvm-community"
           java-version: "21"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Setup Clojure
         uses: DeLaGuardo/setup-clojure@13.4
