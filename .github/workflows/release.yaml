@@ -21,7 +21,7 @@ jobs:
         with:
           distribution: "graalvm-community"
           java-version: "21"
-          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Clojure
         uses: DeLaGuardo/setup-clojure@13.4
@@ -57,4 +57,4 @@ jobs:
           name: blueprintDE ${{ github.ref_name }}
           files: bd-linux-amd64
         env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
