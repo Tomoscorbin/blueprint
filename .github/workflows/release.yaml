@@ -45,15 +45,18 @@ jobs:
         run: |
           JAR_PATH=$(echo target/*-standalone.jar)
           ls -lh "$JAR_PATH"
+
           native-image \
             --no-fallback \
             --features=clj_easy.graal_build_time.InitClojureClasses \
             --report-unsupported-elements-at-runtime \
             -H:+ReportExceptionStackTraces \
             -H:IncludeResources="databricks_runtime.edn" \
-            -H:IncludeResources="templates/.*"
-            -jar "$JAR_PATH" \
-            bp-linux-amd64
+            -H:IncludeResources="templates/.*" \
+            -cp "$JAR_PATH" \
+            -H:Class=blueprint.core \
+            -H:Name=bp-linux-amd64
+
           ls -lh bp-linux-amd64
 
       - name: Attach binary to GitHub Release
