@@ -48,13 +48,13 @@ jobs:
             --no-fallback \
             --report-unsupported-elements-at-runtime \
             -jar target/*.jar \
-            bd-linux-amd64
+            bp-linux-amd64
 
       - name: Attach binary to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: blueprintDE ${{ github.ref_name }}
-          files: bd-linux-amd64
+          files: bp-linux-amd64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
