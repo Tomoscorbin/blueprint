@@ -6,7 +6,7 @@
         org.jline/jline-terminal {:mvn/version "3.30.6"}}
 
  :aliases
- {:run-m {:main-opts ["-m" "kraft"]}
+ {:run-m {:main-opts ["-m" "blueprint"]}
   :nrepl
   {:extra-deps {nrepl/nrepl       {:mvn/version "1.0.0"}
                 cider/cider-nrepl {:mvn/version "0.42.1"}}

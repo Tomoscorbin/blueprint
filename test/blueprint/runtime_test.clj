@@ -1,7 +1,7 @@
-(ns kraft.runtime-test
+(ns blueprint.runtime-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [kraft.runtime :as runtime]))
+   [blueprint.runtime :as runtime]))
 
 (deftest resolve-python-version-uses-fixed-lib-version-for-python-lib-projects
   (testing "resolve-python-version returns python-lib version for :python-lib projects"

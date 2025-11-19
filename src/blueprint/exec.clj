@@ -1,4 +1,4 @@
-(ns kraft.exec
+(ns blueprint.exec
   "Execute a planned layout by creating directories and writing files."
   (:require [clojure.java.io :as io]
             [selmer.parser :as selmer]))

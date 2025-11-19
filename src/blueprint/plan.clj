@@ -1,8 +1,8 @@
-(ns kraft.plan
+(ns blueprint.plan
   "Plan the on-disk layout for a new project."
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [kraft.runtime :as runtime]))
+            [blueprint.runtime :as runtime]))
 ;;TODO: force user to provide valid python package name??
 ;; Layout specification
 ;;

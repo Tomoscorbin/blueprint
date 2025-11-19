@@ -1,5 +1,5 @@
-(ns kraft.tui.core
-  (:require [kraft.tui.menu :as menu]))
+(ns blueprint.tui.core
+  (:require [blueprint.tui.menu :as menu]))
 
 (def ^:private esc "\u001b[")
 (defn- bold-green [s] (str esc "1;32m" s esc "0m"))

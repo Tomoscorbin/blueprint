@@ -1,7 +1,7 @@
-(ns kraft.tui.menu-test
+(ns blueprint.tui.menu-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [kraft.tui.menu :as menu]))
+   [blueprint.tui.menu :as menu]))
 
 (defn- seq-reader
   "Given a vector of key codes, return a function that yields one code

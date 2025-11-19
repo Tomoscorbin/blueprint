@@ -1,4 +1,4 @@
-(ns kraft.runtime
+(ns blueprint.runtime
   "Resolve runtime-related values (Python version, requires-python, Databricks runtime)
   from a manifest EDN and project-type-specific rules."
   (:require [clojure.edn :as edn]
