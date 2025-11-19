@@ -1,6 +1,5 @@
 # Blueprint
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/tomoscorbin/blueprint/main/install.sh | bash
-bd init
+curl -fsSL https://raw.githubusercontent.com/tomoscorbin/blueprint/main/scripts/install.sh | bash
 ```
