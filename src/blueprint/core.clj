@@ -8,6 +8,7 @@
 
   Public entry point:
   - `-main` – prompt for answers and generate the project on disk."
+  (:gen-class)
   (:require
    [blueprint.plan :as plan]
    [blueprint.exec :as exec]
@@ -58,6 +59,6 @@
   - Prompt the user for project configuration.
   - Plan the on-disk layout.
   - Render and write all files for the new project."
-  []
+  [& _args]
   (-> (prompt-answers!)
       (generate-project!)))
