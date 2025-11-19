@@ -1,0 +1,55 @@
+name: Build native Linux binary
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  native-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup GraalVM (JDK 21 with native-image)
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: "graalvm-community"
+          java-version: "21"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          components: "native-image"
+
+      - name: Setup Clojure
+        uses: DeLaGuardo/setup-clojure@13.4
+        with:
+          cli: "latest"
+
+      - name: Cache Clojure deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+            .cpcache
+          key: cljdeps-${{ hashFiles('deps.edn') }}
+          restore-keys: cljdeps-
+
+      - name: Build uberjar
+        run: clojure -T:build uber
+
+      - name: Build native image
+        run: |
+          ls target
+          native-image \
+            --no-fallback \
+            --report-unsupported-elements-at-runtime \
+            -jar target/*.jar \
+            bd-linux-amd64
+
+      - name: Upload native binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: bd-linux-amd64
+          path: bd-linux-amd64
