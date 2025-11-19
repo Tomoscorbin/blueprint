@@ -51,6 +51,7 @@ jobs:
             --report-unsupported-elements-at-runtime \
             -H:+ReportExceptionStackTraces \
             -H:IncludeResources="databricks_runtime.edn" \
+            -H:IncludeResources="templates/.*"
             -jar "$JAR_PATH" \
             bp-linux-amd64
           ls -lh bp-linux-amd64
