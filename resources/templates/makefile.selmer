@@ -9,6 +9,7 @@ TEST_DIR := tests
 help:
 	@echo "Available targets:"
 	@echo "  init          Set up virtualenv and install dependencies"
+	@echo "  hook          Install pre-commit hooks"
 	@echo "  ruff          Run ruff check"
 	@echo "  fix           Run ruff check --fix"
 	@echo "  format        Run ruff format"
@@ -27,6 +28,10 @@ help:
 .PHONY: init
 init:
 	uv sync --all-groups
+
+.PHONY: hook
+hook:
+	uv run pre-commit install --hook-type commit-msg
 
 # ----------------------------------------------------------------------
 # Static analysis
@@ -57,7 +62,6 @@ lint: ruff types
 test:
 	uv run pytest
 
-# If you decide to split tests later:
 #.PHONY: test-unit
 #test-unit:
 #	uv run pytest -q $(TEST_DIR)/unit
