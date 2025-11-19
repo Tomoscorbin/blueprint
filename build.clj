@@ -2,7 +2,7 @@
   (:require [clojure.tools.build.api :as b]))
 
 (def lib 'io.github.tomoscorbin/blueprint)
-(def version "0.2.4")
+(def version "0.1.0")
 
 (def main 'blueprint.core)
 
