@@ -1,10 +1,10 @@
-(ns kraft.core-test
+(ns blueprint.core-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [kraft.core :as core]
-   [kraft.plan :as plan]
-   [kraft.exec :as exec]
-   [kraft.tui.core :as tui]))
+   [blueprint.core :as core]
+   [blueprint.plan :as plan]
+   [blueprint.exec :as exec]
+   [blueprint.tui.core :as tui]))
 
 (deftest prompt-answers!-for-python-lib-does-not-ask-host
   (testing "prompt-answers! does not request Databricks host for :python-lib projects"

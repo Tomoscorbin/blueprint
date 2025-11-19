@@ -1,10 +1,10 @@
-# io.github.tomoscorbin/kraft
+# io.github.tomoscorbin/blueprint
 
 FIXME: my new application.
 
 ## Installation
 
-Download from https://github.com/tomoscorbin/kraft
+Download from https://github.com/tomoscorbin/blueprint
 
 ## Usage
 
@@ -20,7 +20,7 @@ Run the project, overriding the name to be greeted:
     $ clojure -X:run-x :name '"Someone"'
     Hello, Someone!
 
-Run the project directly, via `:main-opts` (`-m tomoscorbin.kraft`):
+Run the project directly, via `:main-opts` (`-m tomoscorbin.blueprint`):
 
     $ clojure -M:run-m
     Hello, World!
@@ -48,7 +48,7 @@ from `build.clj`.
 
 Run that uberjar:
 
-    $ java -jar target/io.github.tomoscorbin/kraft-0.1.0-SNAPSHOT.jar
+    $ java -jar target/io.github.tomoscorbin/blueprint-0.1.0-SNAPSHOT.jar
 
 ## Options
 

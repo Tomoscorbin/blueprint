@@ -1,8 +1,8 @@
-(ns kraft.tui.core-test
+(ns blueprint.tui.core-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [kraft.tui.core :as tui]
-   [kraft.tui.menu :as menu]))
+   [blueprint.tui.core :as tui]
+   [blueprint.tui.menu :as menu]))
 
 (deftest ask-project-name!-returns-read-line
   (testing "ask-project-name! returns whatever read-line provides"

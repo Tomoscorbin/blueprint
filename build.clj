@@ -2,9 +2,9 @@
   (:refer-clojure :exclude [test])
   (:require [clojure.tools.build.api :as b]))
 
-(def lib 'io.github.tomoscorbin/kraft)
+(def lib 'io.github.tomoscorbin/blueprint)
 (def version "0.1.0-SNAPSHOT")
-(def main 'tomoscorbin.kraft)
+(def main 'tomoscorbin.blueprint)
 (def class-dir "target/classes")
 
 (defn test "Run all the tests." [opts]

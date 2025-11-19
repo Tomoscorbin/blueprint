@@ -1,13 +1,13 @@
-(ns kraft.exec-test
+(ns blueprint.exec-test
   (:require
    [clojure.java.io :as io]
    [clojure.string :as str]
    [clojure.test :refer [deftest is testing]]
-   [kraft.exec :as exec]))
+   [blueprint.exec :as exec]))
 
 (defn- temp-dir []
   ;; Create a temporary directory we can use for file tests.
-  (let [f (java.io.File/createTempFile "kraft-exec-" "tmp")]
+  (let [f (java.io.File/createTempFile "blueprint-exec-" "tmp")]
     (.delete f)
     (.mkdir f)
     f))

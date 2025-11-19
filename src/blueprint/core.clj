@@ -1,17 +1,17 @@
-(ns kraft.core
-  "Top-level orchestration for the kraft CLI.
+(ns blueprint.core
+  "Top-level orchestration for the blueprint CLI.
 
   This namespace wires together:
-  - TUI prompts (`kraft.tui.core`) to collect answers
-  - Layout planning (`kraft.plan`)
-  - File rendering (`kraft.exec`)
+  - TUI prompts (`blueprint.tui.core`) to collect answers
+  - Layout planning (`blueprint.plan`)
+  - File rendering (`blueprint.exec`)
 
   Public entry point:
   - `-main` – prompt for answers and generate the project on disk."
   (:require
-   [kraft.plan :as plan]
-   [kraft.exec :as exec]
-   [kraft.tui.core :as tui]))
+   [blueprint.plan :as plan]
+   [blueprint.exec :as exec]
+   [blueprint.tui.core :as tui]))
 
 (defn- prompt-answers!
   "Interactively collect the high-level project configuration from the user.
@@ -52,7 +52,7 @@
     (exec/execute! layout data)))
 
 (defn -main
-  "CLI entry point for kraft.
+  "CLI entry point for blueprint.
 
   Orchestrates the full flow:
   - Prompt the user for project configuration.

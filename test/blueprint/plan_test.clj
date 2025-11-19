@@ -1,10 +1,10 @@
-(ns kraft.plan-test
+(ns blueprint.plan-test
   (:require
    [clojure.set :as set]
    [clojure.java.io :as io]
    [clojure.test :refer [deftest is testing]]
-   [kraft.plan :as plan]
-   [kraft.runtime :as runtime]))
+   [blueprint.plan :as plan]
+   [blueprint.runtime :as runtime]))
 
 (deftest join-path-delegates-to-io-file
   (testing "join-path builds paths the same way as java.io.File"

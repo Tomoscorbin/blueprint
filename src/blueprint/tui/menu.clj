@@ -1,4 +1,4 @@
-(ns kraft.tui.menu
+(ns blueprint.tui.menu
   "Inline arrow-key menu rendered directly to the terminal using ANSI escape codes
    and JLine for raw input."
   (:import [org.jline.terminal TerminalBuilder Terminal]))
