@@ -336,8 +336,8 @@ This repo comes with a minimal Databricks Asset Bundle setup The bundle is set u
 a **Python wheel** rather than as loose files. The reasons for this are:
 
 - **Better dependency management**
-  The exact same dependencies you work with locally are imported into the Databricks cluster, keeping your
-  local development environment in sync with Databricks.
+  The exact same dependencies you work with locally are imported into the Databricks cluster. This keeps your
+  local development environment in sync with Databricks, whilst also ensuring consistency across clusters and workspaces.
 - **Clean imports**
   Because your code is an installed package, everything imports via `import {{ project_name }}...`.
   You do not need `sys.path` hacks to import modules.
@@ -345,8 +345,8 @@ a **Python wheel** rather than as loose files. The reasons for this are:
   Each build produces a wheel with a specific version, so you know exactly which code version a given job is running,
   and you can roll forward/back by changing the wheel version.
 - **Build-time failures**
-  Building a wheel as part of CI can catch issues before they are deployed if the wheel fails to build due to packaging
-  or dependencies problems.
+  Building a wheel as part of CI can catch issues before they are deployed to Databricks. For example if the wheel
+  fails to build due to packaging or dependencies problems.
 - **Same code everywhere** – the code you run locally is the same code that gets shipped to Databricks. There is no
   "workspace copy" which can be edited and drift out of sync.
 
