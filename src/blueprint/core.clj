@@ -10,10 +10,17 @@
   - `-main` – prompt for answers and generate the project on disk."
   (:gen-class)
   (:require
-   [blueprint.version :as v]
    [blueprint.plan :as plan]
    [blueprint.exec :as exec]
-   [blueprint.tui.core :as tui]))
+   [blueprint.tui.core :as tui]
+   [clojure.edn :as edn]
+   [clojure.java.io :as io]))
+
+(def version
+  (-> (io/resource "blueprint/version.edn")
+      slurp
+      edn/read-string
+      :version))
 
 (defn- prompt-answers!
   "Interactively collect the high-level project configuration from the user.
@@ -62,7 +69,7 @@
   (println "  bp --help      # show this help"))
 
 (defn- print-version []
-  (println "bp" v/version))
+  (println "bp" version))
 
 (defn -main
   "CLI entry point for blueprint.
