@@ -1,4 +1,4 @@
-name: Release native Linux binary
+name: Release native binaries
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  native-linux:
+  release:
     runs-on: ubuntu-latest
 
     steps:
