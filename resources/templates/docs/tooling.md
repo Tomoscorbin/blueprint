@@ -190,7 +190,24 @@ source = ["{{ project_name }}"]
 branch = true
 ```
 
-### CLI entry point
+## Python version
+
+This repo includes a `.python-version` file alongside `pyproject.toml`.
+
+- The `requires-python` field in `pyproject.toml` expresses a **supported range** (for example `>=3.12,<3.13`) so tools
+  like `uv`, pip, and CI can refuse obviously incompatible interpreters.
+- `.python-version` pins a **specific interpreter version** (for example `3.12.3`) for local use. `uv` will
+  automatically select that Python when you work inside this repo, so everyone develops and runs tests against the same interpreter.
+
+Treat `pyproject.toml` as the place where you declare what versions are supported, and `.python-version` as the exact Python
+actually used.
+
+{% if project_type = :dabs %}
+For Databricks bundle projects, The `.python-version` is set to match the Python version of the Databricks Runtime
+(latest by default). That keeps your local interpreter aligned with the runtime that will execute your wheel on the cluster.
+{% endif %}
+
+## CLI entry point
 
 The project exposes a CLI entry point via [project.scripts]:
 
