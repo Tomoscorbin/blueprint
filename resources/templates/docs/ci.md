@@ -1,0 +1,47 @@
+# Continuous Integration (GitHub Actions)
+
+This repo comes with a basic GitHub Actions pipeline that runs on **pull requests targeting `main`**.
+
+The CI pipeline checks four things:
+
+1. Does the code pass linting and formatting rules?
+2. Does the type checker complain?
+3. Do the tests pass?
+4. Does the package actually build into a wheel?
+
+All of this is defined in `.github/workflows/ci.yml`. As soon as you push this repo to GitHub,
+it will **automatically** show up under the **Actions** tab. You don't need to manually create
+a workflow. The only requirement is that you keep the file in the same path.
+
+CI only runs for pull requests that target the main branch. Direct pushes to main are blocked by
+pre-commit and branch rules; you work via PRs.
+
+{% if project_type = :dabs %}
+
+## Databricks bundle validation
+
+This step checks that your `databricks.yaml` and resource files are valid and that the Databricks CLI can talk to your workspace.
+The job uses the Databricks CLI with client credentials (service principal + secret). In the workflow, those values are read
+from GitHub Actions secrets:
+
+```yaml
+env:
+  DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+  DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+```
+
+You have to provide these two secrets yourself. Until you do, the bundle job will fail.
+
+### What you need to set up
+
+1. In the Databricks account console, create a service principal and assign it to the workspace with enough permissions
+to validate/deploy bundles. Then generate an OAuth client ID and secret for it. Databricks documents this flow as
+["service principal authorization with OAuth client credentials"](https://docs.databricks.com/aws/en/dev-tools/auth/?utm_source=chatgpt.com).
+2. In GitHub, go to your repository → Settings → Secrets and variables → Actions and create two [repository secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets?utm_source=chatgpt.com):
+
+- DATABRICKS_CLIENT_ID – the service principal’s client (application) ID
+- DATABRICKS_CLIENT_SECRET – the OAuth secret you generated for that service principal
+
+Once those two secrets are set, the bundle job can authenticate and run databricks bundle validate against the
+workspace defined in databricks.yaml.
+{% endif %}
