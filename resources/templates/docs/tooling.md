@@ -1,5 +1,7 @@
 # Tooling
 
+[comment]: # TODO: talk about .python-version
+
 ## Python packaging
 
 This repo is set up as an installable Python package using a `pyproject.toml` configuration and Hatchling as the build backend
@@ -67,7 +69,7 @@ from {{ project_name }}.main import main
 not:
 
 ```python
-from src.{{ project_name }}.main import main  # ❌ do not do this
+ from src.{{ project_name }}.main import main  # ❌ do not do this
 ```
 
 Tests are set up to work with this layout as well. When you run:
@@ -250,17 +252,78 @@ uv build
 
 This creates a wheel (`.whl`) and a source distribution (`.tar.gz`)
 
-- Declares the package's metadata under [project]: the name defaults to whatever you entered during `bp init`, the version
-  starts at `0.1.0`, and the `requires-python` field is pre-populated from the runtime you chose.The main dependencies
-  list is intentionally empty so you can add runtime requirements as you build features.
-- Tooling-only dependencies sit under [dependency-groups.dev]. Running `make init` (`uv sync --all-groups`
-  under the hood) installs the dev toolchain in one go. You’ll see PySpark, pytest, Ruff, mypy, Commitizen,
-  and pre-commit listed. Keep this list to things you expect every contributor to need; create additional groups if you
-  want optional extras.
-- The [project.scripts] entry wires up a console entry point called `main` that points at `{{project_name}}.main:main`.
-  That means `uv run main` (or `python -m {{project_name}}.main`) will execute the generated `src/{{project_name}}/main.py`.
-- [build-system] is set to Hatchling, so `uv build` (and CI) produce standard wheel and sdist artifacts without extra configuration.
-- Tool-specific configuration also lives in the same file to keep everything centralized: [tool.ruff] applies a project-wide
-  line length of 120, and [tool.commitizen] configures the conventional-commit bumping flow (same `0.1.0` version declares
-  above, `pyproject.toml` as the version file, changelog auto-updates). The rest of the tooling (Makefile targets, pre-
-  commit hooks, CI) points at this file.
+## Commit messages (Commitizen & Conventional Commits)
+
+This repo uses **Commitizen** to standardise commit messages and drive automatic version bumps from git history.
+The configuration lives in `pyproject.toml` under `[tool.commitizen]`, and the `commitizen` package is installed
+as part of the `dev` dependency group.
+
+At a high level:
+
+- you write commits using the [**Conventional Commits**] (<https://www.conventionalcommits.org/>) format
+- Commitizen (and CI) reads those messages
+- the version in `pyproject.toml` is bumped based on the types of changes you made
+
+The detailed CI/release flow is described in a separate document; this section focuses on how you should
+write commits day to day.
+
+### Commit format
+
+Commit messages should follow the Conventional Commits pattern:
+
+```text
+<type>[:optional scope]: <short description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Common prefixes you are expected to use:
+
+- `feat`: a new feature
+- `fix`: a bug fix
+- `docs`: documentation-only changes
+- `refactor`: code changes that are not features or bug fixes
+- `style`: formatting / stylistic changes only
+- `test`: adding or updating tests
+- `chore`: repo maintenance, tooling changes, etc.
+
+Examples:
+
+```
+feat: add segmentation pipeline
+fix: handle empty input file 
+```
+
+There is also a pre-commit configuration in this repo which can enforce the commit format for you.
+See the Pre-commit section for details.
+
+## Pre-commit hooks
+
+This repo uses **pre-commit** to run a set of checks automatically when you make a commit.
+The goal is to catch formatting issues, obvious mistakes, and bad commit messages before they reach CI.
+
+The configuration lives in `.pre-commit-config.yaml` at the repo root, and `pre-commit` itself is installed
+as part of the `dev` dependency group in `pyproject.toml`.
+
+### Enabling the hooks
+
+After generating or cloning the repo, you need to install the hooks once:
+
+```bash
+make init   # install all dev dependencies with uv
+make hook   # register the pre-commit hooks
+```
+
+After that, the hooks will run automatically when you commit.
+
+On commit, pre-commit will:
+
+- run Ruff for linting/formatting
+- run mypy for basic type checking
+- run a handful of hygiene checks (YAML/TOML validity, trailing whitespace, merge conflicts, EOF)
+- run a Commitizen commit-msg hook to enforce the Conventional Commits format and block direct commits to main
+
+If any hook fails, the commit is rejected. You'll need fix the reported issues and try again. The configuration for
+tools like Ruff and mypy lives in `pyproject.toml` under the corresponding [tool.*] sections.
