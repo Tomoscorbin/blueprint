@@ -2,12 +2,15 @@
 
 This repo comes with a basic GitHub Actions pipeline that runs on **pull requests targeting `main`**.
 
-The CI pipeline checks four things:
+The CI pipeline checks for the following things:
 
 1. Does the code pass linting and formatting rules?
 2. Does the type checker complain?
 3. Do the tests pass?
 4. Does the package actually build into a wheel?
+{% if (= project_type "dabs") %}
+5. Does the Databricks bundle configuration validate?
+{% endif %}
 
 All of this is defined in `.github/workflows/ci.yml`. As soon as you push this repo to GitHub,
 it will **automatically** show up under the **Actions** tab. You don't need to manually create
@@ -31,8 +34,7 @@ env:
 ```
 
 You have to provide these two secrets yourself. Until you do, the bundle job will fail.
-
-### What you need to set up
+To set this up:
 
 1. In the Databricks account console, create a service principal and assign it to the workspace with enough permissions
 to validate/deploy bundles. Then generate an OAuth client ID and secret for it. Databricks documents this flow as
