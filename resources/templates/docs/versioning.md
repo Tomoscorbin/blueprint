@@ -69,10 +69,10 @@ Commitizen looks at all commits since the last version tag and decides whether t
 
 With cz_conventional_commits, the default rules are:
 
-- feat: ... → minor bump (e.g. 0.1.0 → 0.2.0)
-- fix: ... → patch bump (e.g. 0.1.0 → 0.1.1)
-- commits marked as breaking (BREAKING CHANGE: in the footer or feat!: / fix!:) → major bump
-- everything else (docs, chore, style, test, build, ci, refactor without BREAKING CHANGE) → no bump
+- `feat`: ... → minor bump (e.g. `0.1.0` → `0.2.0`)
+- `fix`: ... → patch bump (e.g. `0.1.0` → `0.1.1`)
+- commits marked as breaking (`BREAKING CHANGE:` in the footer or `feat!:` / `fix!:`) → major bump
+- everything else (`docs`, `chore`, `style`, `test`, `build`, `ci`, refactor without `BREAKING CHANGE`) → no bump
 
 ## Pre-commit and commit message enforcement
 
