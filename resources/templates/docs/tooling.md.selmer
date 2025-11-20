@@ -133,6 +133,18 @@ docs = [
 ]
 ```
 
+#### Built-in dev tooling
+
+The `dev` dependency group comes preloaded with a few opinionated tools:
+
+- Ruff
+- pre-commit
+- mypy
+- pytest
+- PySpark – Spark from Python
+
+To make Spark tests easy to write, the scaffold includes a tiny SparkSession fixture for pytest (in `tests/conftest.py`).
+
 ### Tool configuration in pyproject.toml
 
 Several tools read their configuration directly from pyproject.toml so there is a single source of truth.
