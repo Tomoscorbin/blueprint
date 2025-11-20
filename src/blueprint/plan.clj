@@ -43,10 +43,14 @@
                      :source "templates/sample_job.job.yaml.selmer"}
    :github-ci-md    {:destination "docs/ci.md"
                      :source "templates/docs/github_ci.md.selmer"}
+   :azure-ci-md     {:destination "docs/ci.md"
+                     :source "tempaltes/docs/azure_ci.md.selmer"}
    :tooling-md      {:destination "docs/tooling.md"
                      :source "templates/docs/tooling.md.selmer"}
-   :versioning-md   {:destination "docs/versioning.md"
-                     :source "templates/docs/versioning.md.selmer"}})
+   :github-versioning-md   {:destination "docs/versioning.md"
+                            :source "templates/docs/github_versioning.md.selmer"}
+   :azure-versioning-md    {:destination "docs/version.md"
+                            :source "templates/docs/azure_versioning.md.selmer"}})
 
 (def ^:private base-layout-keys
   "Layout entries that are always created, regardless of CI provider or project type."
@@ -62,9 +66,7 @@
    :test-init
    :test-main
    :makefile
-   :github-ci-md
-   :tooling-md
-   :versioning-md])
+   :tooling-md])
 
 (defn- base-layout
   "Return the subset of `layout-spec` that is common to all projects."
@@ -103,8 +105,8 @@
   - :azure  -> Azure Pipelines YAML"
   [{:keys [ci-provider]}]
   (case ci-provider
-    :github (select-keys layout-spec [:github-ci :github-bump])
-    :azure  (select-keys layout-spec [:azure-ci :azure-bump])))
+    :github (select-keys layout-spec [:github-ci :github-bump :github-versioning-md :github-ci-md])
+    :azure  (select-keys layout-spec [:azure-ci :azure-bump :azure-versioning-md :azure-ci-md])))
 
 (defn- choose-project-files
   "Return additional layout entries based on `:project-type` in `answers`.

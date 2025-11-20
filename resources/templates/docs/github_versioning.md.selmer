@@ -1,4 +1,4 @@
-# Versioning and releases
+# Versioning
 
 This project uses **Commitizen** and Conventional Commits to manage versions and changelogs.
 The bump happens automatically on pushes to main.

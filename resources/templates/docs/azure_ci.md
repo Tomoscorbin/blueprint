@@ -1,6 +1,6 @@
-# Continuous Integration (GitHub Actions)
+# Continuous Integration (Azure DevOps)
 
-This repo comes with a basic GitHub Actions pipeline that runs on **pull requests targeting `main`**.
+This repo comes with a basic Azure DevOps pipeline that runs on **pull requests targeting `main`**.
 
 The CI pipeline checks for the following things:
 
@@ -12,9 +12,8 @@ The CI pipeline checks for the following things:
 5. Does the Databricks bundle configuration validate?
 {% endif %}
 
-All of this is defined in `.github/workflows/ci.yml`. As soon as you push this repo to GitHub,
-it will **automatically** show up under the **Actions** tab. You don't need to manually create
-a workflow. The only requirement is that you keep the file in the same path.
+All of this is defined in `.azure/ci.yml`. In Azure DevOps,
+you will need to create a new Pipeline pointing to this file.
 
 CI only runs for pull requests that target the main branch. Direct pushes to main are blocked by
 pre-commit and branch rules; you work via PRs.
@@ -29,8 +28,8 @@ from GitHub Actions secrets:
 
 ```yaml
 env:
-  DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
-  DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+  DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
+  DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
 ```
 
 You have to provide these two secrets yourself. Until you do, the bundle job will fail.
@@ -39,11 +38,12 @@ To set this up:
 1. In the Databricks account console, create a service principal and assign it to the workspace with enough permissions
 to validate/deploy bundles. Then generate an OAuth client ID and secret for it. Databricks documents this flow as
 ["service principal authorization with OAuth client credentials"](https://docs.databricks.com/aws/en/dev-tools/auth/?utm_source=chatgpt.com).
-2. In GitHub, go to your repository → **Settings** → **Secrets and variables** → **Actions** and create two [repository secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets?utm_source=chatgpt.com):
+2. In Azure DevOps, go to **Pipelines** → **(your pipeline)** → **Edit** → **Variables**, and create two [variables](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/set-secret-variables?view=azure-devops&tabs=yaml%2Cbash):
 
-- DATABRICKS_CLIENT_ID – the service principal’s client (application) ID
-- DATABRICKS_CLIENT_SECRET – the OAuth secret you generated for that service principal
+- DATABRICKS_CLIENT_ID – service principal client/application ID
+- DATABRICKS_CLIENT_SECRET – the OAuth secret
 
+Mark both as secret.
 Once those two secrets are set, the bundle job can authenticate and run databricks bundle validate against the
 workspace defined in `databricks.yaml`.
 {% endif %}

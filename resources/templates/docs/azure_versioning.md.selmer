@@ -1,0 +1,75 @@
+# Versioning
+
+This project uses Commitizen and Conventional Commits to manage versions and changelogs.
+The bump happens automatically in Azure DevOps whenever main gets a new commit.
+
+There are three moving parts:
+
+- the version field in `pyproject.toml` (the canonical project version)
+- git tags (`0.1.0`, `0.2.0`, …)
+- an Azure DevOps pipeline that runs Commitizen on every push to main
+
+You do **not** bump versions by hand. You write sensible Conventional Commit messages,
+and Commitizen decides the next version.
+
+The version bump job lives in `.azure/bump.yaml`. In Azure DevOps,
+you will need to create a new Pipeline pointing to this file.
+
+## What gets versioned
+
+The Commitizen config lives in `pyproject.toml`:
+
+```toml
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+version_files = ["pyproject.toml:version"]
+update_changelog_on_bump = true
+```
+
+This tells Commitizen to:
+
+- use the [conventional commits rules](https://www.conventionalcommits.org/)
+- treat [project].version in `pyproject.toml` as the source of truth
+- update that field on each bump
+- update the changelog automatically when a bump happens
+
+On each successful bump, Commitizen will:
+
+- update `pyproject.toml` with the new version
+- append to the changelog
+- create a commit with a message starting with bump:
+- create a git tag for that version (for example `v0.2.0`)
+
+## Permissions required in Azure DevOps
+
+For the bump job to work, you must:
+
+1. Go to **Project Settings** → **Repositories** → **(your repo)** → **Security**.
+2. Find the build service identity, e.g.:
+
+- `ProjectName Build Service` (OrganizationName)
+- `ProjectName Build Service` (ProjectName)
+
+3. Set these to `Allow`:
+
+- `Contribute`
+- `Create tag`
+
+If those permissions are missing, the bump job will fail.
+
+## How Commitizen decides the new version
+
+Commitizen looks at all commits since the last version tag and decides whether to do a major, minor, or patch bump.
+
+With cz_conventional_commits, the default rules are:
+
+- `feat`: ... → minor bump (e.g. `0.1.0` → `0.2.0`)
+- `fix`: ... → patch bump (e.g. `0.1.0` → `0.1.1`)
+- commits marked as breaking (`BREAKING CHANGE:` in the footer or `feat!:` / `fix!:`) → major bump
+- everything else (`docs`, `chore`, `style`, `test`, `build`, `ci`, refactor without `BREAKING CHANGE`) → no bump
+
+## Pre-commit and commit message enforcement
+
+Pre-commit is also wired in to make sure you actually follow the Conventional Commits format.
+In `.pre-commit-config.yaml` there is a Commitizen hook configured for the `commit-msg` stage.
