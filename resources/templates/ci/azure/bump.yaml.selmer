@@ -27,11 +27,19 @@ jobs:
         displayName: "Install Commitizen"
 
       - script: |
-          set -e
-
           git checkout main
           git config user.name "Bump Bot"
           git config user.email "bump@hotmail.com"
+
+          rc=$?
+
+          if [ "$rc" -eq 21 ]; then
+            echo "No version bump required; exiting successfully."
+            exit 0
+          elif [ "$rc" -ne 0 ]; then
+            echo "cz bump failed with exit code $rc"
+            exit "$rc"
+          fi
 
           cz bump --yes --changelog
 
