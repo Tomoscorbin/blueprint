@@ -327,3 +327,164 @@ On commit, pre-commit will:
 
 If any hook fails, the commit is rejected. You'll need fix the reported issues and try again. The configuration for
 tools like Ruff and mypy lives in `pyproject.toml` under the corresponding [tool.*] sections.
+
+{% if project_type = :dabs %}
+
+## Databricks Asset Bundles (DABs)
+
+This repo comes with a minimal Databricks Asset Bundle setup The bundle is set up to deploy your code to Databricks as
+a **Python wheel** rather than as loose files. The reasons for this are:
+
+- **Better dependency management**
+  The exact same dependencies you work with locally are imported into the Databricks cluster, keeping your
+  local development environment in sync with Databricks.
+- **Clean imports**
+  Because your code is an installed package, everything imports via `import {{ project_name }}...`.
+  You do not need `sys.path` hacks to import modules.
+- **Tracability**
+  Each build produces a wheel with a specific version, so you know exactly which code version a given job is running,
+  and you can roll forward/back by changing the wheel version.
+- **Build-time failures**
+  Building a wheel as part of CI can catch issues before they are deployed if the wheel fails to build due to packaging
+  or dependencies problems.
+- **Same code everywhere** – the code you run locally is the same code that gets shipped to Databricks. There is no
+  "workspace copy" which can be edited and drift out of sync.
+
+### Bundle configuration
+
+The two main pieces are:
+
+- `databricks.yaml` – top-level bundle configuration
+- `resources/sample_job.yml` – a sample job that runs your package as a wheel
+
+These are just starting points. You'll need to reconfigure them to match your own workspaces, clusters, jobs, etc.
+
+`databricks.yaml` defines the bundle, what gets built, and where it gets deployed:
+
+```yaml
+bundle:
+  name: {{ project_name }}
+
+include:
+  - resources/*.yml
+  - resources/*/*.yml
+
+artifacts:
+  python_artifact:
+    type: whl
+    build: uv build --wheel
+```
+
+The python_artifact section tells Databricks to build a wheel using `uv build --wheel`, which reads from your
+`pyproject.toml` and writes into `dist/`.That ties directly into the packaging setup described above. The same version
+and metadata you maintain in `pyproject.toml` are what Databricks sees in the built wheel.
+
+The file also defines two targets:
+
+```yaml
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: {{ hostname }}
+    presets:
+      artifacts_dynamic_version: true
+
+  prod:
+    mode: production
+    workspace:
+      host: {{ hostname }}
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+
+```
+
+- `dev` is the default target, using `mode: development` so deployed resources are treated as a development copy.
+- `prod` uses `mode: production` and a different `root_path` for where bundle assets live.
+
+The `host` values are templated from what you entered during `bp init`. In a real project you will usually
+point `dev.workspace.host` at your development workspace, and point `prod.workspace.host`` at your production
+(or at least non-dev) workspace. Adjust`root_path` to match whatever folder structure your team uses
+(for example under `/Workspace/Shared/<team>/<project>`).
+
+### Sample job
+
+The repo includes a single example job definition under `resources/sample_job.yml`:
+
+```yaml
+resources:
+  jobs:
+    sample_job:
+      name: sample_job
+      tasks:
+        - task_key: python_wheel_task
+          python_wheel_task:
+            package_name: {{ project_name }}
+            entry_point: main
+          job_cluster_key: job_cluster
+          libraries:
+            - whl: ../dist/*.whl
+
+      job_clusters:
+        - job_cluster_key: job_cluster
+          new_cluster:
+            spark_version: {{ databricks_runtime }}.x-scala2.12
+            node_type_id: i3.xlarge
+            data_security_mode: SINGLE_USER
+            autoscale:
+              min_workers: 1
+              max_workers: 4
+```
+
+This is wired to run your package as a Python wheel task.
+
+Databricks does not call individual `.py` files directly in this setup. Instead, it calls **entry points** defined in
+`pyproject.toml` under `[project.scripts]`.
+
+Each entry point is just:
+
+- a name (the console command)
+- a dotted path to `module:function` inside `src/{{ project_name }}/`
+
+For example:
+
+```toml
+[project.scripts]
+main       = "{{ project_name }}.main:main"
+etl-daily  = "{{ project_name }}.pipelines.daily:run"
+etl-backfill = "{{ project_name }}.pipelines.backfill:run"
+```
+
+In your bundle job YAML, you reference these names via `python_wheel_task.entry_point`:
+
+```yaml
+resources:
+  jobs:
+    customer_pipelines:
+      name: customer_pipelines
+      tasks:
+        - task_key: daily
+          python_wheel_task:
+            package_name: {{ project_name }}
+            entry_point: etl-daily
+          job_cluster_key: job_cluster
+          libraries:
+            - whl: ../dist/*.whl
+
+        - task_key: backfill
+          python_wheel_task:
+            package_name: {{ project_name }}
+            entry_point: etl-backfill
+          job_cluster_key: job_cluster
+          libraries:
+            - whl: ../dist/*.whl
+```
+
+The pattern is:
+
+- put your pipeline orchestration code in normal modules under src/{{ project_name }}/...
+- add a small run()/main()-style function as the entry point
+- expose that function in [project.scripts]
+- point python_wheel_task.entry_point at that script name
+{% endif %}
