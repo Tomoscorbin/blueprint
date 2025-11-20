@@ -72,7 +72,7 @@ stages:
 
           - script: make build
             displayName: "Build wheel"
-
+{% if project_type = :dabs %}
       - job: bundle
         displayName: "Validate bundle"
         steps:
@@ -83,4 +83,4 @@ stages:
             env:
               DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
               DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)
-
+{% endif %}
