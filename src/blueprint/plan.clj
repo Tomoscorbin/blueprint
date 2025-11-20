@@ -4,18 +4,6 @@
             [clojure.string :as str]
             [blueprint.runtime :as runtime]))
 ;;TODO: force user to provide valid python package name??
-;; Layout specification
-;;
-;; `layout-spec` is a map of:
-;;   layout-id keyword
-;;   -> {:destination \"relative/path/with/{pkg}\"
-;;       :source      \"templates/...\" | nil}
-;;
-;; `:destination` paths are relative to the project root until `qualify-layout`
-;; is applied.
-;; `:source` is a classpath resource path for the template, or nil for
-;; empty files.
-;;
 (def ^:private layout-spec
   {:main            {:destination "src/{pkg}/main.py"
                      :source "templates/main.py.selmer"}
@@ -52,7 +40,13 @@
    :databricks-yaml  {:destination "databricks.yaml"
                       :source "templates/databricks.yaml.selmer"}
    :sample-job      {:destination "resources/sample_job.job.yaml"
-                     :source "templates/sample_job.job.yaml.selmer"}})
+                     :source "templates/sample_job.job.yaml.selmer"}
+   :github-ci-md    {:destination "docs/ci.md"
+                     :source "templates/docs/github_ci.md.selmer"}
+   :tooling-md      {:destination "docs/tooling.md"
+                     :source "templates/docs/tooling.md.selmer"}
+   :versioning-md   {:destination "docs/versioning.md"
+                     :source "templates/docs/versioning.md.selmer"}})
 
 (def ^:private base-layout-keys
   "Layout entries that are always created, regardless of CI provider or project type."
@@ -67,7 +61,10 @@
    :conftest
    :test-init
    :test-main
-   :makefile])
+   :makefile
+   :github-ci-md
+   :tooling-md
+   :versioning-md])
 
 (defn- base-layout
   "Return the subset of `layout-spec` that is common to all projects."
