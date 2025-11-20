@@ -1,6 +1,6 @@
 # Blueprint
 
-An opinionated CLI for spinning up best-practice data engineering projects in seconds.
+An opinionated CLI for spinning up data engineering projects. It takes care of boilerplate setup like static analysis, CI pipelines, Python packaging, and the rest of the groundwork so you are not wiring the same basics together from scratch every time you start a new project.
 
 - 🧱 Project scaffold: sets up a full data-engineering repo with sensible defaults for structure, config, and tooling
 - 🔀 Bundle or package: spin up either a Databricks Asset Bundle project or a standalone Python package
