@@ -145,6 +145,23 @@ The `dev` dependency group comes preloaded with a few opinionated tools:
 
 To make Spark tests easy to write, the scaffold includes a tiny SparkSession fixture for pytest (in `tests/conftest.py`).
 
+#### Makefile commands
+
+The repo includes a Makefile with a set of common workflows so you do not have to remember long uv/pytest/tool commands.
+
+The main ones are:
+
+- `make init` - set up the virtual environment and install dependencies.
+- `make lint` - run Ruff over src/ and tests/.
+- `make types` - run mypy for static type checking.
+- `make test` - run the pytest test suite.
+
+You can see all available commands and their descriptions with:
+
+```bash
+make help
+```
+
 ### Tool configuration in pyproject.toml
 
 Several tools read their configuration directly from pyproject.toml so there is a single source of truth.
