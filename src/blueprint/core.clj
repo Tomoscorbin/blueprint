@@ -17,7 +17,7 @@
    [clojure.java.io :as io]))
 
 (def version
-  (-> (io/resource "blueprint/version.edn")
+  (-> (io/resource "version.edn")
       slurp
       edn/read-string
       :version))
