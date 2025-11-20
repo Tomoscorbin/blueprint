@@ -19,6 +19,7 @@
 .settings
 .socket-repl-port
 .sw*
+.markdownlint-cli2.jsonc
 .vscode
 *.class
 *.jar

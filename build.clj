@@ -1,9 +1,8 @@
 (ns build
-  (:require [clojure.tools.build.api :as b]
-            [blueprint.version :as v]))
+  (:require [clojure.tools.build.api :as b]))
 
 (def lib 'io.github.tomoscorbin/blueprint)
-(def version v/version)
+(def version "0.1.6")
 
 (def main 'blueprint.core)
 

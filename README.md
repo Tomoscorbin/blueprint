@@ -4,11 +4,15 @@ An opinionated CLI for spinning up data engineering projects. It takes care of b
 
 - 🧱 Project scaffold: sets up a full data-engineering repo with sensible defaults for structure, config, and tooling
 - 🔀 Bundle or package: spin up either a Databricks Asset Bundle project or a standalone Python package
-- 🔁 CI/CD: generates GitHub Actions or Azure Pipelines workflows that run linting, type checking, pytest, wheel builds, and Databricks Asset Bundle validation
-- 🛠️ Dev tooling: `pyproject.toml` prewired for `uv`, `ruff`, `mypy`, and `pytest`, plus pre-commit hooks, and a Makefile that wraps everyday commands
+- 🔁 CI/CD: generates GitHub Actions or Azure Pipelines workflows that run linting, type checking, pytest, wheel builds,
+  and Databricks Asset Bundle validation
+- 🛠️ Dev tooling: pyproject.toml prewired for uv, Ruff, mypy, and pytest, plus pre-commit hooks, and a Makefile that
+  wraps everyday commands (lint, test, format, etc.)
 - 🔢 Versioning: uses Commitizen to automatically bump the project version and create tags when changes are merged
 - ☁️ Databricks: creates a Databricks Asset Bundle configured to build your code as a wheel
-- 🔥 Testing: `pytest` layout with a lightweight Spark session fixture for local unit tests
+- 🔥 Testing: pytest layout with a lightweight Spark session fixture for local unit tests
+- 📚 Docs: generated projects include markdown guides (`tooling.md`, `ci.md`, `versioning.md`, etc.) explaining how packaging,
+  CI, versioning, and Databricks bundles are wired
 
 ## Installation
 
