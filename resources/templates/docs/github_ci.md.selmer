@@ -8,7 +8,7 @@ The CI pipeline checks for the following things:
 2. Does the type checker complain?
 3. Do the tests pass?
 4. Does the package actually build into a wheel?
-{% if (= project_type "dabs") %}
+{% if project_type = :dabs %}
 5. Does the Databricks bundle configuration validate?
 {% endif %}
 
