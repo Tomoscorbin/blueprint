@@ -12,15 +12,7 @@
   (:require
    [blueprint.plan :as plan]
    [blueprint.exec :as exec]
-   [blueprint.tui.core :as tui]
-   [clojure.edn :as edn]
-   [clojure.java.io :as io]))
-
-(def version
-  (-> (io/resource "version.edn")
-      slurp
-      edn/read-string
-      :version))
+   [blueprint.tui.core :as tui]))
 
 (defn- prompt-answers!
   "Interactively collect the high-level project configuration from the user.
@@ -68,9 +60,6 @@
   (println "  bp --version   # show version")
   (println "  bp --help      # show this help"))
 
-(defn- print-version []
-  (println "bp" version))
-
 (defn -main
   "CLI entry point for blueprint.
 
@@ -85,14 +74,6 @@
       "init"
       (-> (prompt-answers!)
           (generate-project!))
-
-      "--version"
-      (do (print-version)
-          (System/exit 0))
-
-      "-V"
-      (do (print-version)
-          (System/exit 0))
 
       ;; help commands
       "--help"
