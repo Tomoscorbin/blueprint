@@ -528,8 +528,8 @@ resources:
 
 The pattern is:
 
-- put your pipeline orchestration code in normal modules under src/{{ project_name }}/...
-- add a small run()/main()-style function as the entry point
+- put your pipeline orchestration code in normal modules under `src/{{ project_name }}/...`
+- add a small `run()`/`main()`-style function as the entry point
 - expose that function in `[project.scripts]`
-- point python_wheel_task.entry_point at that script name
+- point `python_wheel_task.entry_point`` at that script name
 {% endif %}
