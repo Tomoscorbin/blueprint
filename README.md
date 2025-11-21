@@ -34,6 +34,7 @@ Then, in the generated repo root:
 
 ```bash
 make init
+git init
 make hook
 ```
 
