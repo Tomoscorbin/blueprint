@@ -1,5 +1,5 @@
 ![GitHub Release](https://img.shields.io/github/v/release/Tomoscorbin/blueprint)
-
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Tomoscorbin/blueprint/ci.yaml?label=CI)
 
 # Blueprint
 
