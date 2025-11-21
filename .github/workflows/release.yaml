@@ -9,8 +9,16 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  build:
+    name: Build ${{ matrix.os }} binary
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            binary_name: bp-linux-amd64
+          - os: macos-latest
+            binary_name: bp-macos-arm64
 
     steps:
       - name: Checkout
@@ -24,7 +32,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Clojure
-        uses: DeLaGuardo/setup-clojure@13.4
+        uses: DeLaGuardo/setup-cl:wqojure@13.4
         with:
           cli: latest
 
@@ -55,15 +63,35 @@ jobs:
             -H:IncludeResources="templates/.*" \
             -cp "$JAR_PATH" \
             -H:Class=blueprint.core \
-            -H:Name=bp-linux-amd64
+            -H:Name=${{ matrix.binary_name }}
 
-          ls -lh bp-linux-amd64
+          ls -lh ${{ matrix.binary_name }}
 
-      - name: Attach binary to GitHub Release
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.binary_name }}
+          path: ${{ matrix.binary_name }}
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: List downloaded files
+        run: ls -R dist
+
+      - name: Attach binaries to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: blueprint ${{ github.ref_name }}
-          files: bp-linux-amd64
+          files: dist/**/*
           generate_release_notes: true
           token: ${{ secrets.GITHUB_TOKEN }}
