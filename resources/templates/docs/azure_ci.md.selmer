@@ -40,8 +40,8 @@ to validate/deploy bundles. Then generate an OAuth client ID and secret for it. 
 ["service principal authorization with OAuth client credentials"](https://docs.databricks.com/aws/en/dev-tools/auth/?utm_source=chatgpt.com).
 2. In Azure DevOps, go to **Pipelines** → **(your pipeline)** → **Edit** → **Variables**, and create two [variables](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/set-secret-variables?view=azure-devops&tabs=yaml%2Cbash):
 
-- DATABRICKS_CLIENT_ID – service principal client/application ID
-- DATABRICKS_CLIENT_SECRET – the OAuth secret
+- `DATABRICKS_CLIENT_ID` – service principal client/application ID
+- `DATABRICKS_CLIENT_SECRET` – the OAuth secret
 
 Mark both as secret.
 Once those two secrets are set, the bundle job can authenticate and run databricks bundle validate against the

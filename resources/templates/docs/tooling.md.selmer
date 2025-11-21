@@ -93,6 +93,7 @@ Dev-only tools (linters, type checkers, test frameworks, commit tooling, etc.) a
 dev = [
   "pyspark",
   "pytest",
+  "pytest-cov",
   "ruff",
   "mypy",
   "commitizen",
@@ -141,7 +142,7 @@ The `dev` dependency group comes preloaded with a few opinionated tools:
 - pre-commit
 - mypy
 - pytest
-- PySpark – Spark from Python
+- PySpark
 
 To make Spark tests easy to write, the scaffold includes a tiny SparkSession fixture for pytest (in `tests/conftest.py`).
 
@@ -166,7 +167,7 @@ make help
 
 Several tools read their configuration directly from pyproject.toml so there is a single source of truth.
 
-Ruff is configured under [tool.ruff]:
+Ruff is configured under `[tool.ruff]`:
 
 ```toml
 [tool.ruff]
@@ -175,7 +176,7 @@ line-length = 120
 
 At the moment this only sets the line length, but you can add more Ruff settings here as needed.
 
-Commitizen is configured under [tool.commitizen]:
+Commitizen is configured under `[tool.commitizen]`:
 
 ```toml
 [tool.commitizen]
@@ -188,7 +189,7 @@ update_changelog_on_bump = true
 This tells Commitizen to:
 
 - use the standard Conventional Commits syntax (feat, fix, etc.)
-- treat the version field in [project] as the canonical version
+- treat the version field in `[project]` as the canonical version
 - update pyproject.toml when bumping
 - keep the changelog in sync when bumps happen
 
@@ -236,7 +237,7 @@ For Databricks bundle projects, The `.python-version` is set to match the Python
 
 ## CLI entry point
 
-The project exposes a CLI entry point via [project.scripts]:
+The project exposes a CLI entry point via `[project.scripts]`:
 
 ```toml
 [project.scripts]
@@ -267,7 +268,7 @@ or:
 uv run python -m {{ project_name }}.main
 ```
 
-As the project evolves, you can rename the script or add more entry points by updating [project.scripts].
+As the project evolves, you can rename the script or add more entry points by updating `[project.scripts]`.
 For example, to expose a trainer command:
 
 ```toml
@@ -278,7 +279,7 @@ etl = "{{ project_name }}.etl:run"
 
 #### Building wheels and sdists
 
-The [build-system] section configures Hatchling as the build backend:
+The `[build-system]` section configures Hatchling as the build backend:
 
 ```toml
 [build-system]
@@ -299,7 +300,7 @@ This creates a wheel (`.whl`) and a source distribution (`.tar.gz`)
 ## Commit messages (Commitizen & Conventional Commits)
 
 This repo uses **Commitizen** to standardise commit messages and drive automatic version bumps from git history.
-The configuration lives in `pyproject.toml` under `[tool.commitizen]`, and the `commitizen` package is installed
+The configuration lives in `pyproject.toml` under `[tool.commitizen]`, and the commitizen package is installed
 as part of the `dev` dependency group.
 
 At a high level:
@@ -370,7 +371,7 @@ On commit, pre-commit will:
 - run a Commitizen commit-msg hook to enforce the Conventional Commits format and block direct commits to main
 
 If any hook fails, the commit is rejected. You'll need fix the reported issues and try again. The configuration for
-tools like Ruff and mypy lives in `pyproject.toml` under the corresponding [tool.*] sections.
+tools like Ruff and mypy lives in `pyproject.toml` under the corresponding `[tool.*]` sections.
 
 {% if project_type = :dabs %}
 
@@ -529,6 +530,6 @@ The pattern is:
 
 - put your pipeline orchestration code in normal modules under src/{{ project_name }}/...
 - add a small run()/main()-style function as the entry point
-- expose that function in [project.scripts]
+- expose that function in `[project.scripts]`
 - point python_wheel_task.entry_point at that script name
 {% endif %}

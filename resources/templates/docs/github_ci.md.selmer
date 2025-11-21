@@ -42,8 +42,8 @@ to validate/deploy bundles. Then generate an OAuth client ID and secret for it. 
 ["service principal authorization with OAuth client credentials"](https://docs.databricks.com/aws/en/dev-tools/auth/?utm_source=chatgpt.com).
 2. In GitHub, go to your repository → **Settings** → **Secrets and variables** → **Actions** and create two [repository secrets](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets?utm_source=chatgpt.com):
 
-- DATABRICKS_CLIENT_ID – the service principal’s client (application) ID
-- DATABRICKS_CLIENT_SECRET – the OAuth secret you generated for that service principal
+- `DATABRICKS_CLIENT_ID` – the service principal’s client (application) ID
+- `DATABRICKS_CLIENT_SECRET` – the OAuth secret you generated for that service principal
 
 Once those two secrets are set, the bundle job can authenticate and run databricks bundle validate against the
 workspace defined in `databricks.yaml`.
