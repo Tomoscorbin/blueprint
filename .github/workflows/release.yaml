@@ -23,7 +23,8 @@ jobs:
             binary_name: bp-macos-arm64
             artifact_name: bp-macos-arm64
           - os: windows-latest
-            binary_name: bp-windows-amd64.exe
+            binary_name: bp-windows-amd64
+            binary_path: bp-windows-amd64.exe
             artifact_name: bp-windows-amd64
 
     defaults:
@@ -83,7 +84,7 @@ jobs:
             -H:IncludeResources="templates/.*" \
             -cp "$JAR_PATH" \
             -H:Class=blueprint.core \
-            -H:Name=${{ matrix.binary_name }}
+            -o ${{ matrix.binary_name }}
 
           ls -lh ${{ matrix.binary_name }}
 
@@ -118,13 +119,22 @@ jobs:
             -H:Class=blueprint.core `
             -o '${{ matrix.binary_name }}'
 
-          Get-Item '${{ matrix.binary_name }}' | Format-List *
+          Get-Item '${{ matrix.binary_path }}' | Format-List *
 
-      - name: Upload binary artifact
+      # ---------- Upload artifacts ----------
+      - name: Upload binary artifact (Linux/macOS)
+        if: runner.os != 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
           path: ${{ matrix.binary_name }}
+
+      - name: Upload binary artifact (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.binary_path }}
 
   release:
     name: Create GitHub Release
