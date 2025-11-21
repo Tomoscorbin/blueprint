@@ -39,4 +39,4 @@ make hook      # install pre-commit hooks into .git/hooks
 ```
 Note: `git init` is required before `make hook`, because pre-commit needs an initialised Git repository to install the hooks into.
 
-See [here](docs/intro.md) for more information.
+See [here](doc/intro.md) for more information.
