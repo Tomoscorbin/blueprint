@@ -42,7 +42,7 @@ CI provider-specific files:
 Project-type extras:
 
 - Python library → targets Python 3.14 by default and stops there.
-- Databricks Asset Bundle → `databricks.yaml` wired for wheel builds (`uv build --wheel`), a sample job under `resources/sample_job.job.yaml`, and versions lifted from `resources/databricks_runtime.edn` (runtime 17.3 LTS / Python 3.12). The Databricks hostname you enter is injected into the bundle config.
+- Databricks Asset Bundle → `databricks.yaml` wired for wheel builds (`uv build --wheel`), a sample job under `resources/sample_job.job.yaml`, and versions lifted from Databricks Runtime 17.3 LTS. The Databricks hostname you enter is injected into the bundle config.
 
 ## After generation
 
