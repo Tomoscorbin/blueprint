@@ -45,10 +45,10 @@
                      :source "templates/docs/azure_ci.md.selmer"}
    :tooling-md      {:destination "docs/tooling.md"
                      :source "templates/docs/tooling.md.selmer"}
-   :github-versioning-md   {:destination "docs/versioning.md"
-                            :source "templates/docs/github_versioning.md.selmer"}
-   :azure-versioning-md    {:destination "docs/version.md"
-                            :source "templates/docs/azure_versioning.md.selmer"}})
+   :github-version-md   {:destination "docs/versioning.md"
+                         :source "templates/docs/github_versioning.md.selmer"}
+   :azure-version-md    {:destination "docs/version.md"
+                         :source "templates/docs/azure_versioning.md.selmer"}})
 
 (def ^:private base-layout-keys
   "Layout entry ids included for every project (selected from `layout-spec`
@@ -104,8 +104,8 @@
   - :azure  -> Azure Pipelines YAML"
   [{:keys [ci-provider]}]
   (case ci-provider
-    :github (select-keys layout-spec [:github-ci :github-bump :github-versioning-md :github-ci-md])
-    :azure  (select-keys layout-spec [:azure-ci :azure-bump :azure-versioning-md :azure-ci-md])))
+    :github (select-keys layout-spec [:github-ci :github-bump :github-version-md :github-ci-md])
+    :azure  (select-keys layout-spec [:azure-ci :azure-bump :azure-version-md :azure-ci-md])))
 
 (defn- choose-project-files
   "Return additional layout entries based on `:project-type` in `answers`.
