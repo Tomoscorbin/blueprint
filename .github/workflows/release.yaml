@@ -116,7 +116,7 @@ jobs:
             -H:IncludeResources="templates/.*" `
             -cp "$jarPath" `
             -H:Class=blueprint.core `
-            -H:Name='${{ matrix.binary_name }}'
+            -o '${{ matrix.binary_name }}'
 
           Get-Item '${{ matrix.binary_name }}' | Format-List *
 
