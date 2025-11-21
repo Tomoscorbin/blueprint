@@ -6,7 +6,6 @@ import pytest
 @pytest.fixture(scope="session")
 def spark() -> Iterator[SparkSession]:
     """Minimal, fast SparkSession for tests."""
-    quiet_py4j()
     spark = (
         SparkSession.builder.master("local[1]")
         .appName("spark-proof-tests")
