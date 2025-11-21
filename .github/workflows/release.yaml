@@ -32,7 +32,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Clojure
-        uses: DeLaGuardo/setup-cl:wqojure@13.4
+        uses: DeLaGuardo/setup-clojure@13.4
         with:
           cli: latest
 
