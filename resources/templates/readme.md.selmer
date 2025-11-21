@@ -1,9 +1,44 @@
 # {{ project_name }}
-#
-#
-Explain the following:
-- Need to configure Databricks CLI using secrets
-- assumes an SPN for Databricks
-- explain how to set up the environment with uv
-- 
 
+{% if project_type = :dabs %}
+This repository is a **Databricks Asset Bundles (DABs)** project. Your code is packaged as a Python wheel and deployed to Databricks jobs via bundles, with a modern Python packaging setup (`pyproject.toml`, `src/` layout) and opinionated tooling preconfigured.
+{% else %}
+This repository is a **Python package** (with an optional CLI) generated with a modern setup: `pyproject.toml`, `src/`-based layout, and opinionated tooling baked in.
+{% endif %}
+
+The scaffold gives you:
+
+- an installable Python package under `src/`
+- a small CLI entry point wired via `[project.scripts]`
+- `uv` for dependency management
+- `pytest`, `ruff`, `mypy`, `pre-commit`, and Commitizen
+{% if project_type = :dabs %}
+- a minimal Databricks Asset Bundle configured to run your code as a wheel
+{% endif %}
+
+For detailed documentation, see:
+
+- [docs/tooling.md](docs/tooling.md) – Python packaging, tooling, Makefile commands, CLI entry points.
+- [docs/ci.md](docs/ci.md) – how CI is wired for this repo.
+- [docs/versioning.md](docs/versioning.md) – how Commitizen and Conventional Commits control versions.
+
+---
+
+## Getting started
+
+1. **Install prerequisites**
+
+   - Python (matching `.python-version` in the repo)
+   - [`uv`](https://github.com/astral-sh/uv) for dependency management
+   - `make`
+
+{% if project_type = :dabs %}
+
+- Databricks CLI configured for your workspace (see [docs/tooling.md](docs/tooling.md) for bundle details)
+{% endif %}
+
+2. **Set up the environment**
+
+   ```bash
+   make sync
+   make hook
