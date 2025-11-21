@@ -21,7 +21,7 @@ You will be prompted for:
 1) Project name → becomes the repository directory and package name.
 2) CI provider → GitHub Actions or Azure DevOps.
 3) Project type → Python library or Databricks Asset Bundle.
-4) Databricks hostname → only asked when you pick the bundle option.
+4) Databricks hostname → only asked when you pick the bundle option (you can skip by hitting enter).
 
 When the prompts finish, Blueprint creates a sibling directory matching your project name and writes all files there.
 
