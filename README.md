@@ -11,7 +11,7 @@ An opinionated CLI for spinning up data engineering projects. It takes care of b
 - 🔢 Versioning: uses Commitizen to automatically bump the project version and create tags when changes are merged
 - ☁️ Databricks: creates a Databricks Asset Bundle configured to build your code as a wheel
 - 🔥 Testing: pytest layout with a lightweight Spark session fixture for local unit tests
-- 📚 Docs: generated projects include markdown guides (`tooling.md`, `ci.md`, `versioning.md`, etc.) explaining how packaging,
+- 📚 Docs: generated projects include markdown guides explaining how packaging,
   CI, versioning, and Databricks bundles are wired
 
 ## Installation
