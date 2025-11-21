@@ -9,7 +9,9 @@
   (when-let [p (.getParentFile f)]
     (.mkdirs p)))
 
-(defn- write-empty-file! [destination]
+(defn- write-empty-file!
+  "Writes an empty file to the target destination"
+  [destination]
   (let [file (io/file destination)]
     (ensure-parent! file)
     (spit file "")))

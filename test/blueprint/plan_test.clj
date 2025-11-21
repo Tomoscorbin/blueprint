@@ -56,14 +56,14 @@
   (testing "choose-ci-layout returns GitHub CI entries for :github"
     (let [answers  {:ci-provider :github}
           ci-layout (#'plan/choose-ci-layout answers)]
-      (is (= #{:github-ci :github-bump}
+      (is (= #{:github-ci :github-bump :github-ci-md :github-version-md}
              (set (keys ci-layout)))))))
 
 (deftest choose-ci-layout-adds-azure-files
   (testing "choose-ci-layout returns Azure CI entry for :azure"
     (let [answers  {:ci-provider :azure}
           ci-layout (#'plan/choose-ci-layout answers)]
-      (is (= #{:azure-ci :azure-bump}
+      (is (= #{:azure-ci :azure-bump :azure-ci-md :azure-version-md}
              (set (keys ci-layout)))))))
 
 (deftest choose-project-files-adds-dabs-files
