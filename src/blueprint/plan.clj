@@ -51,7 +51,8 @@
                             :source "templates/docs/azure_versioning.md.selmer"}})
 
 (def ^:private base-layout-keys
-  "Layout entries that are always created, regardless of CI provider or project type."
+  "Layout entry ids included for every project (selected from `layout-spec`
+  before CI provider or project-type extras are added)."
   [:main
    :python-init
    :runtime
@@ -109,8 +110,9 @@
 (defn- choose-project-files
   "Return additional layout entries based on `:project-type` in `answers`.
 
-  Allowed poject types:
-  - :dabs -> Databricks bundle files (databricks.yaml + sample job)"
+  Supported project types:
+  - :dabs       -> Databricks bundle files (databricks.yaml + sample job)
+  - :python-lib -> no extras beyond the base layout"
   [{:keys [project-type]}]
   (case project-type
     :dabs (select-keys layout-spec [:databricks-yaml :sample-job])

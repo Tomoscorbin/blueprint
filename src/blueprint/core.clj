@@ -7,7 +7,8 @@
   - File rendering (`blueprint.exec`)
 
   Public entry point:
-  - `-main` – prompt for answers and generate the project on disk."
+  - `-main` – dispatch CLI commands (`init`, `--help`/`-h`), prompting and
+    generating the project during `init`."
   (:gen-class)
   (:require
    [blueprint.plan :as plan]
@@ -64,9 +65,9 @@
   "CLI entry point for blueprint.
 
   Commands:
-  - `bp init`   → prompt for project config and generate the project
-  - `bp help`   → show usage
-  - `bp`        → show usage and exit non-zero"
+  - `bp init`       → prompt for project config and generate the project
+  - `bp --help/-h`  → show usage
+  - default/none    → show usage and exit non-zero"
   [& args]
   (let [[cmd & _] args]
     (case cmd
