@@ -60,7 +60,9 @@ jobs:
       - name: Build uberjar
         run: clojure -T:build uber
 
-      - name: Build native image
+      # ---------- Linux + macOS native image ----------
+      - name: Build native image (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
           JAR_PATH=$(echo target/*-standalone.jar)
           echo "Using JAR: $JAR_PATH"
@@ -69,7 +71,7 @@ jobs:
           echo "java --version:"
           java --version || true
 
-          echo "native-image --version:"
+          echo "native-image --version (Unix):"
           native-image --version
 
           native-image \
@@ -84,6 +86,39 @@ jobs:
             -H:Name=${{ matrix.binary_name }}
 
           ls -lh ${{ matrix.binary_name }}
+
+      # ---------- Windows native image ----------
+      - name: Build native image (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $jar = Get-ChildItem "target/*-standalone.jar" | Select-Object -First 1
+          if (-not $jar) {
+            Write-Error "No standalone JAR found in target/"
+            exit 1
+          }
+          $jarPath = $jar.FullName
+          Write-Host "Using JAR: $jarPath"
+          Get-Item $jarPath | Format-List *
+
+          Write-Host "java --version:"
+          java --version
+
+          Write-Host "native-image --version (Windows):"
+          native-image --version
+
+          native-image `
+            --no-fallback `
+            --features=clj_easy.graal_build_time.InitClojureClasses `
+            --report-unsupported-elements-at-runtime `
+            -H:+ReportExceptionStackTraces `
+            -H:IncludeResources="databricks_runtime.edn" `
+            -H:IncludeResources="templates/.*" `
+            -cp "$jarPath" `
+            -H:Class=blueprint.core `
+            -H:Name='${{ matrix.binary_name }}'
+
+          Get-Item '${{ matrix.binary_name }}' | Format-List *
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
