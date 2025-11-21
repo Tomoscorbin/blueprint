@@ -9,23 +9,28 @@ echo "Installing ${BINARY_NAME} ..."
 # 1. Detect OS
 uname_os="$(uname -s)"
 case "$uname_os" in
-  Linux)  os="linux" ;;
-  Darwin) os="macos" ;;
-  *)
-    echo "Unsupported OS: $uname_os" >&2
-    exit 1
-    ;;
+Linux) os="linux" ;;
+Darwin) os="macos" ;;
+*)
+  echo "Unsupported OS: $uname_os" >&2
+  exit 1
+  ;;
 esac
 
-# 2. Detect arch (simple version: x86_64 only)
+# 2. Detect arch
 uname_arch="$(uname -m)"
 case "$uname_arch" in
-  x86_64|amd64) arch="amd64" ;;
-  *)
-    echo "Unsupported architecture: $uname_arch" >&2
-    echo "Right now only x86_64/amd64 builds are published." >&2
-    exit 1
-    ;;
+x86_64 | amd64)
+  arch="amd64"
+  ;;
+arm64 | aarch64)
+  arch="arm64"
+  ;;
+*)
+  echo "Unsupported architecture: $uname_arch" >&2
+  echo "Right now only linux-amd64 and macos-arm64 builds are published." >&2
+  exit 1
+  ;;
 esac
 
 ASSET_NAME="${BINARY_NAME}-${os}-${arch}"
@@ -36,10 +41,10 @@ VERSION="${BP_VERSION:-latest}"
 if [ "$VERSION" = "latest" ]; then
   echo "Resolving latest release tag from GitHub..."
   TAG=$(
-    curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" \
-      | grep '"tag_name"' \
-      | head -n1 \
-      | cut -d '"' -f4
+    curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" |
+      grep '"tag_name"' |
+      head -n1 |
+      cut -d '"' -f4
   )
 else
   TAG="v${VERSION}"
