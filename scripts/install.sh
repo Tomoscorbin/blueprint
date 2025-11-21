@@ -9,8 +9,15 @@ echo "Installing blueprint ..."
 # 1. Detect OS
 uname_os="$(uname -s)"
 case "$uname_os" in
-Linux) os="linux" ;;
-Darwin) os="macos" ;;
+Linux)
+  os="linux"
+  ;;
+Darwin)
+  os="macos"
+  ;;
+MINGW* | MSYS* | CYGWIN* | Windows_NT)
+  os="windows"
+  ;;
 *)
   echo "Unsupported OS: $uname_os" >&2
   exit 1
@@ -28,12 +35,16 @@ arm64 | aarch64)
   ;;
 *)
   echo "Unsupported architecture: $uname_arch" >&2
-  echo "Right now only linux-amd64 and macos-arm64 builds are published." >&2
+  echo "Right now only linux-amd64, macos-arm64, and windows-amd64 builds are published." >&2
   exit 1
   ;;
 esac
 
 ASSET_NAME="${BINARY_NAME}-${os}-${arch}"
+# Windows asset has .exe suffix in the release
+if [ "$os" = "windows" ]; then
+  ASSET_NAME="${ASSET_NAME}.exe"
+fi
 
 # 3. Resolve version/tag
 VERSION="${BP_VERSION:-latest}"
@@ -80,15 +91,27 @@ fi
 
 mkdir -p "${BIN_DIR}"
 
-TARGET="${BIN_DIR}/${BINARY_NAME}"
+# On Windows, install as bp.exe; elsewhere just bp
+if [ "$os" = "windows" ]; then
+  TARGET="${BIN_DIR}/${BINARY_NAME}.exe"
+else
+  TARGET="${BIN_DIR}/${BINARY_NAME}"
+fi
 
 # 6. Move into place (sudo only if needed)
 if [ -w "${BIN_DIR}" ]; then
   mv "${TMP_BIN}" "${TARGET}"
 else
-  echo "Installing to ${TARGET} (may require sudo)..."
-  sudo mv "${TMP_BIN}" "${TARGET}"
+  if command -v sudo >/dev/null 2>&1; then
+    echo "Installing to ${TARGET} (may require sudo)..."
+    sudo mv "${TMP_BIN}" "${TARGET}"
+  else
+    echo "Directory ${BIN_DIR} is not writable and sudo is not available." >&2
+    echo "Re-run with BP_BIN_DIR pointing to a writable directory (e.g. \$HOME/.local/bin)." >&2
+    exit 1
+  fi
 fi
 
 echo
 echo "Installed ${BINARY_NAME} to ${TARGET}"
+echo "Make sure ${BIN_DIR} is on your PATH, then run: ${BINARY_NAME}"
