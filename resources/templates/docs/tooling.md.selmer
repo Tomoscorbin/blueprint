@@ -14,7 +14,7 @@ and a `src/`-based layout. That means:
 
 The `[project]` section in `pyproject.toml` declares the core package metadata. The important fields are:
 
-- `name` – the package name (and import name) for this repo. By default it is whatever you typed at `bp init`.
+- `name` – the package name (and import name) for this repo. By default it is whatever you typed at `bp sync`.
 - `version` – starts at `0.1.0`. This is the canonical version for the package and is also tracked by Commitizen.
 - `requires-python` – the supported Python range, pre-populated from the runtime you chose when creating the project
   (for example `>=3.12`).
@@ -37,7 +37,7 @@ dependencies = [
 After editing the file, you refresh your environment so `uv` installs the new dependency:
 
 ```bash
-make init
+make sync
 ```
 
 ### Source layout and imports
@@ -52,7 +52,7 @@ By default you will see:
 
 ```
 src/{{ project_name }}/
-  __init__.py
+  __sync__.py
   main.py
   ...
 ```
@@ -109,7 +109,7 @@ This gives you a clean separation:
 When you first generate the project, you install everything with:
 
 ```bash
-make init
+make sync
 ```
 
 That tells `uv` to install both runtime dependencies and the dev group into the virtual environment.
@@ -151,7 +151,7 @@ The repo includes a Makefile with a set of common workflows so you do not have t
 
 The main ones are:
 
-- `make init` - set up the virtual environment and install dependencies.
+- `make sync` - set up the virtual environment and install dependencies.
 - `make lint` - run Ruff over src/ and tests/.
 - `make types` - run mypy for static type checking.
 - `make test` - run the pytest test suite.
@@ -356,7 +356,7 @@ as part of the `dev` dependency group in `pyproject.toml`.
 After generating or cloning the repo, you need to install the hooks once:
 
 ```bash
-make init   # install all dev dependencies with uv
+make sync   # install all dev dependencies with uv
 make hook   # register the pre-commit hooks
 ```
 
@@ -447,7 +447,7 @@ targets:
 - `dev` is the default target, using `mode: development` so deployed resources are treated as a development copy.
 - `prod` uses `mode: production` and a different `root_path` for where bundle assets live.
 
-The `host` values are templated from what you entered during `bp init`. In a real project you will usually
+The `host` values are templated from what you entered during `bp sync`. In a real project you will usually
 point `dev.workspace.host` at your development workspace, and point `prod.workspace.host`` at your production
 (or at least non-dev) workspace. Adjust`root_path` to match whatever folder structure your team uses
 (for example under `/Workspace/Shared/<team>/<project>`).

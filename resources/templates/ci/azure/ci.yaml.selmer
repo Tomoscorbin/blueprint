@@ -22,7 +22,7 @@ stages:
           - script: pip install uv
             displayName: "Install uv"
 
-          - script: make init
+          - script: make sync
             displayName: "Initialise environment"
 
           - script: make lint
@@ -37,7 +37,7 @@ stages:
           - script: pip install uv
             displayName: "Install uv"
 
-          - script: make init
+          - script: make sync
             displayName: "Initialise environment"
 
           - script: make types
@@ -52,7 +52,7 @@ stages:
           - script: pip install uv
             displayName: "Install uv"
 
-          - script: make init
+          - script: make sync
             displayName: "Initialise environment"
 
           - script: make coverage
@@ -67,7 +67,7 @@ stages:
           - script: pip install uv
             displayName: "Install uv"
 
-          - script: make init
+          - script: make sync
             displayName: "Initialise environment"
 
           - script: uv build

@@ -8,7 +8,7 @@ TEST_DIR := tests
 .PHONY: help
 help:
 	@echo "Available targets:"
-	@echo "  init          Set up virtualenv and install dependencies"
+	@echo "  sync          Set up/sync virtualenv and install/update dependencies"
 	@echo "  hook          Install pre-commit hooks"
 	@echo "  ruff          Run ruff check"
 	@echo "  fix           Run ruff check --fix"
@@ -21,8 +21,8 @@ help:
 	@echo "  clean         Remove build / cache artefacts"
 
 
-.PHONY: init
-init:
+.PHONY: sync
+sync:
 	uv sync --all-groups
 
 .PHONY: hook

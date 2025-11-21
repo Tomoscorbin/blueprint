@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
       - run: pip install uv
-      - run: make init
+      - run: make sync
       - run: make lint
 
   types:
@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
       - run: pip install uv
-      - run: make init
+      - run: make sync
       - run: make types
 
   tests:
@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
       - run: pip install uv
-      - run: make init
+      - run: make sync
       - run: make coverage
 
   wheel:
@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
       - run: pip install uv
-      - run: make init
+      - run: make sync
       - run: uv build 
 {% if project_type = :dabs %}
   bundle:
