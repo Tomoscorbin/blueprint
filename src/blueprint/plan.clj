@@ -44,7 +44,7 @@
    :github-ci-md    {:destination "docs/ci.md"
                      :source "templates/docs/github_ci.md.selmer"}
    :azure-ci-md     {:destination "docs/ci.md"
-                     :source "tempaltes/docs/azure_ci.md.selmer"}
+                     :source "templates/docs/azure_ci.md.selmer"}
    :tooling-md      {:destination "docs/tooling.md"
                      :source "templates/docs/tooling.md.selmer"}
    :github-versioning-md   {:destination "docs/versioning.md"
