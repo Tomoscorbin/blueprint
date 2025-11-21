@@ -1,7 +1,7 @@
+# Blueprint
+
 ![GitHub Release](https://img.shields.io/github/v/release/Tomoscorbin/blueprint)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Tomoscorbin/blueprint/ci.yaml?label=CI)
-
-# Blueprint
 
 An opinionated CLI for spinning up data engineering projects. It takes care of boilerplate setup like static analysis, CI pipelines, and Python packaging, so you are not wiring the same basics together from scratch every time you start a new project.
 
