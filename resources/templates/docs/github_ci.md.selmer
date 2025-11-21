@@ -29,8 +29,9 @@ from GitHub Actions secrets:
 
 ```yaml
 env:
-  DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
-  DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+  DATABRICKS_CLIENT_ID: {% verbatim %}${{ secrets.DATABRICKS_CLIENT_ID }}{% endverbatim %}
+
+  DATABRICKS_CLIENT_SECRET: {% verbatim %}${{ secrets.DATABRICKS_CLIENT_SECRET }}{% endverbatim %}
 ```
 
 You have to provide these two secrets yourself. Until you do, the bundle job will fail.
