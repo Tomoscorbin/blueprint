@@ -39,6 +39,7 @@ jobs:
         with:
           distribution: graalvm-community
           java-version: "21"
+          components: native-image 
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Clojure
