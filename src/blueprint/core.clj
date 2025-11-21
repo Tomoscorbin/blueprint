@@ -58,7 +58,6 @@
   (println)
   (println "Usage:")
   (println "  bp init        # interactively create a new project")
-  (println "  bp --version   # show version")
   (println "  bp --help      # show this help"))
 
 (defn -main
