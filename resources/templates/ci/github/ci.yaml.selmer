@@ -33,7 +33,7 @@ jobs:
       - uses: actions/setup-python@v6
       - run: pip install uv
       - run: make init
-      - run: make test
+      - run: make coverage
 
   wheel:
     name: "Build wheel"
@@ -43,7 +43,7 @@ jobs:
       - uses: actions/setup-python@v6
       - run: pip install uv
       - run: make init
-      - run: make build
+      - run: uv build 
 {% if project_type = :dabs %}
   bundle:
     name: "Validate bundle"

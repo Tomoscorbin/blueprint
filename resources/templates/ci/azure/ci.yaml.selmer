@@ -55,7 +55,7 @@ stages:
           - script: make init
             displayName: "Initialise environment"
 
-          - script: make test
+          - script: make coverage
             displayName: "Run tests"
 
       # -------- Wheel build --------
@@ -70,7 +70,7 @@ stages:
           - script: make init
             displayName: "Initialise environment"
 
-          - script: make build
+          - script: uv build
             displayName: "Build wheel"
 {% if project_type = :dabs %}
       - job: bundle

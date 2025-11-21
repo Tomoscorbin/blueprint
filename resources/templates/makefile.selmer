@@ -16,6 +16,7 @@ help:
 	@echo "  types         Run mypy"
 	@echo "  lint          Run ruff check + mypy"
 	@echo "  test          Run unit & integration tests"
+	@echo "  coverage      Run tests and report test coverage"
 	@echo "  all           Run ruff check + mypy + all tests"
 	@echo "  clean         Remove build / cache artefacts"
 
@@ -50,6 +51,12 @@ lint: ruff types
 .PHONY: test
 test:
 	uv run pytest $(TEST_DIR)
+
+coverage:
+	uv run pytest $(TEST_DIR) \
+	  --cov=src \
+	  --cov-report=term-missing \
+	  --cov-report=xml \
 
 .PHONY: all
 all: lint test

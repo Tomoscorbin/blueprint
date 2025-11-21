@@ -9,6 +9,7 @@ dependencies = [
 dev = [
   "pyspark",
   "pytest",
+  "pytest-cov",
   "ruff",
   "mypy",
   "commitizen",
