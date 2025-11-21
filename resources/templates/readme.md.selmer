@@ -22,6 +22,12 @@ For detailed documentation, see:
 - [docs/ci.md](docs/ci.md) – how CI is wired for this repo.
 - [docs/versioning.md](docs/versioning.md) – how Commitizen and Conventional Commits control versions.
 
+Important note: this repo expects the main branch to be called `main`. If you initialise git with any other 
+branch name, perform the following to rename the default branch to `main`:
+
+```bash
+git branch -M main
+```
 ---
 
 ## Getting started
