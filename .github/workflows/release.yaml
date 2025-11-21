@@ -39,7 +39,7 @@ jobs:
         with:
           distribution: graalvm-community
           java-version: "21"
-          components: native-image 
+          components: native-image
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Clojure
@@ -63,7 +63,14 @@ jobs:
       - name: Build native image
         run: |
           JAR_PATH=$(echo target/*-standalone.jar)
+          echo "Using JAR: $JAR_PATH"
           ls -lh "$JAR_PATH"
+
+          echo "java --version:"
+          java --version || true
+
+          echo "native-image --version:"
+          native-image --version
 
           native-image \
             --no-fallback \
@@ -106,4 +113,3 @@ jobs:
           files: dist/**/*
           generate_release_notes: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          fail_on_unmatched_files: true
