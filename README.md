@@ -36,7 +36,7 @@ Follow the arrow-key prompts (project name, CI provider, project type, and Datab
 Then, in the generated repo root:
 
 ```bash
-make init      # create virtualenv and install dependencies with uv
+make sync      # create virtualenv and install dependencies with uv
 git init       # initialise a git repository (required for hooks)
 make hook      # install pre-commit hooks into .git/hooks
 ```
