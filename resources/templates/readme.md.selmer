@@ -41,4 +41,5 @@ For detailed documentation, see:
 
    ```bash
    make sync
+   git init
    make hook
