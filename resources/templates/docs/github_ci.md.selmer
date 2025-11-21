@@ -12,7 +12,7 @@ The CI pipeline checks for the following things:
 5. Does the Databricks bundle configuration validate?
 {% endif %}
 
-All of this is defined in `.github/workflows/ci.yml`. As soon as you push this repo to GitHub,
+All of this is defined in `.github/workflows/ci.yaml`. As soon as you push this repo to GitHub,
 it will **automatically** show up under the **Actions** tab. You don't need to manually create
 a workflow. The only requirement is that you keep the file in the same path.
 

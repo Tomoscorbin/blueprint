@@ -2,7 +2,7 @@
 
 This project uses **Commitizen** and Conventional Commits to manage versions and changelogs.
 The bump happens automatically on pushes to main.
-The GitHub Action is defined in `.github/workflows/bump-version.yml`:
+The GitHub Action is defined in `.github/workflows/bump.yaml`:
 
 There are three moving parts:
 

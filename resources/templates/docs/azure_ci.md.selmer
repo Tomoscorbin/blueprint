@@ -12,7 +12,7 @@ The CI pipeline checks for the following things:
 5. Does the Databricks bundle configuration validate?
 {% endif %}
 
-All of this is defined in `.azure/ci.yml`. In Azure DevOps,
+All of this is defined in `.azure/ci.yaml`. In Azure DevOps,
 you will need to create a new Pipeline pointing to this file.
 
 CI only runs for pull requests that target the main branch. Direct pushes to main are blocked by
@@ -24,7 +24,7 @@ pre-commit and branch rules; you work via PRs.
 
 This step checks that your `databricks.yaml` and resource files are valid and that the Databricks CLI can talk to your workspace.
 The job uses the Databricks CLI with client credentials (service principal + secret). In the workflow, those values are read
-from GitHub Actions secrets:
+from Azure DevOps secrets:
 
 ```yaml
 env:

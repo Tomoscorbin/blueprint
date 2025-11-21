@@ -15,7 +15,7 @@ resources:
       job_clusters:
         - job_cluster_key: job_cluster
           new_cluster:
-            spark_version: {{ databricks_runtime}}.x-scala2.12
+            spark_version: {{ databricks_runtime }}.x-scala2.12
             node_type_id: i3.xlarge
             data_security_mode: SINGLE_USER
             autoscale:

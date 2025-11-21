@@ -52,7 +52,7 @@ By default you will see:
 
 ```
 src/{{ project_name }}/
-  __sync__.py
+  __init__.py
   main.py
   ...
 ```
@@ -231,7 +231,7 @@ Treat `pyproject.toml` as the place where you declare what versions are supporte
 actually used.
 
 {% if project_type = :dabs %}
-For Databricks bundle projects, The `.python-version` is set to match the Python version of the Databricks Runtime
+For Databricks bundle projects, the `.python-version` is set to match the Python version of the Databricks Runtime
 (latest by default). That keeps your local interpreter aligned with the runtime that will execute your wheel on the cluster.
 {% endif %}
 
@@ -377,7 +377,7 @@ tools like Ruff and mypy lives in `pyproject.toml` under the corresponding `[too
 
 ## Databricks Asset Bundles (DABs)
 
-This repo comes with a minimal Databricks Asset Bundle setup The bundle is set up to deploy your code to Databricks as
+This repo comes with a minimal Databricks Asset Bundle setup. The bundle is set up to deploy your code to Databricks as
 a **Python wheel** rather than as loose files. The reasons for this are:
 
 - **Better dependency management**
@@ -386,7 +386,7 @@ a **Python wheel** rather than as loose files. The reasons for this are:
 - **Clean imports**
   Because your code is an installed package, everything imports via `import {{ project_name }}...`.
   You do not need `sys.path` hacks to import modules.
-- **Tracability**
+- **Traceability**
   Each build produces a wheel with a specific version, so you know exactly which code version a given job is running,
   and you can roll forward/back by changing the wheel version.
 - **Build-time failures**
@@ -400,7 +400,7 @@ a **Python wheel** rather than as loose files. The reasons for this are:
 The two main pieces are:
 
 - `databricks.yaml` – top-level bundle configuration
-- `resources/sample_job.yml` – a sample job that runs your package as a wheel
+- `resources/sample_job.job.yaml` – a sample job that runs your package as a wheel
 
 These are just starting points. You'll need to reconfigure them to match your own workspaces, clusters, jobs, etc.
 
@@ -411,8 +411,8 @@ bundle:
   name: {{ project_name }}
 
 include:
-  - resources/*.yml
-  - resources/*/*.yml
+  - resources/*.yaml
+  - resources/*/*.yaml
 
 artifacts:
   python_artifact:
@@ -450,12 +450,12 @@ targets:
 
 The `host` values are templated from what you entered during `bp init`. In a real project you will usually
 point `dev.workspace.host` at your development workspace, and point `prod.workspace.host`` at your production
-(or at least non-dev) workspace. Adjust`root_path` to match whatever folder structure your team uses
+(or at least non-dev) workspace. Adjust `root_path` to match whatever folder structure your team uses
 (for example under `/Workspace/Shared/<team>/<project>`).
 
 ### Sample job
 
-The repo includes a single example job definition under `resources/sample_job.yml`:
+The repo includes a single example job definition under `resources/sample_job.job.yaml`:
 
 ```yaml
 resources:

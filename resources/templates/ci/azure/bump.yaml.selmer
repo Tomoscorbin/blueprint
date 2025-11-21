@@ -31,6 +31,7 @@ jobs:
           git config user.name "Bump Bot"
           git config user.email "bump@hotmail.com"
 
+          cz bump --yes --changelog
           rc=$?
 
           if [ "$rc" -eq 21 ]; then
@@ -40,8 +41,6 @@ jobs:
             echo "cz bump failed with exit code $rc"
             exit "$rc"
           fi
-
-          cz bump --yes --changelog
 
           # Push commit + tags back to the repo
           git push origin main
