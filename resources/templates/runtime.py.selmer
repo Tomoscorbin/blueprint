@@ -1,3 +1,0 @@
-from pyspark.sql import SparkSession
-
-spark = SparkSession.Builder().appName("{{ project_name }}").getOrCreate()

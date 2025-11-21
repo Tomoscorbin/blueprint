@@ -9,8 +9,6 @@
                      :source "templates/main.py.selmer"}
    :python-init     {:destination "src/{pkg}/__init__.py"
                      :source nil}
-   :runtime         {:destination "src/{pkg}/runtime.py"
-                     :source "templates/runtime.py.selmer"}
    :readme          {:destination "README.md"
                      :source "templates/readme.md.selmer"}
    :gitignore       {:destination ".gitignore"
