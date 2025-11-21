@@ -13,12 +13,22 @@ jobs:
     name: Build ${{ matrix.os }} binary
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
             binary_name: bp-linux-amd64
+            artifact_name: bp-linux-amd64
           - os: macos-latest
             binary_name: bp-macos-arm64
+            artifact_name: bp-macos-arm64
+          - os: windows-latest
+            binary_name: bp-windows-amd64.exe
+            artifact_name: bp-windows-amd64
+
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: Checkout
@@ -70,7 +80,7 @@ jobs:
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.binary_name }}
+          name: ${{ matrix.artifact_name }}
           path: ${{ matrix.binary_name }}
 
   release:
@@ -95,3 +105,4 @@ jobs:
           files: dist/**/*
           generate_release_notes: true
           token: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_unmatched_files: true

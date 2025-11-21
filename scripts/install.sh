@@ -4,7 +4,7 @@ set -euo pipefail
 REPO="tomoscorbin/blueprint"
 BINARY_NAME="bp"
 
-echo "Installing ${BINARY_NAME} ..."
+echo "Installing blueprint ..."
 
 # 1. Detect OS
 uname_os="$(uname -s)"
