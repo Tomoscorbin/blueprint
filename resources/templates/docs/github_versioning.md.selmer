@@ -61,7 +61,8 @@ generate a new fine-grained token with read/write access to this repository.
 - `PERSONAL_ACCESS_TOKEN`
 
 The token is used by the action for both checkout and pushing the bump commit + tag.
-If it is missing or under-scoped, the job will fail when it tries to push.
+If it is missing or under-scoped, the job will fail when it tries to push. Make sure 
+the token has read and write access to actions and code.
 
 ## How Commitizen decides the new version
 
