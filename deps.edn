@@ -1,7 +1,7 @@
 {:paths ["src" "resources" "test"]
  :deps {org.clojure/clojure {:mvn/version "1.12.3"}
         selmer/selmer       {:mvn/version "1.12.67"}
-        org.jline/jline {:mvn/version "3.30.6"} ;;TODO: do we need to remove any of these?
+        org.jline/jline {:mvn/version "3.30.6"}
         org.jline/jline-reader   {:mvn/version "3.30.6"}
         org.jline/jline-terminal {:mvn/version "3.30.6"}
         com.github.clj-easy/graal-build-time {:mvn/version "1.0.5"}}
