@@ -3,9 +3,16 @@
    and JLine for raw input."
   (:import [org.jline.terminal TerminalBuilder Terminal]))
 
+(defn- msys? []
+  (some? (System/getenv "MSYSTEM")))
+
 (def ^:private ^Terminal terminal
   (delay
-    (.build (TerminalBuilder/builder))))
+    (let [builder (TerminalBuilder/builder)]
+      (-> builder
+          (.system (not (msys?)))
+          (.streams System/in System/out)
+          (.build)))))
 
 (def ^:private esc "\u001b[")
 
@@ -155,6 +162,5 @@
 
       (finally
         (delete-options-block! lines)
-        (.setAttributes term prev-attr)
-        (.close rdr)))))
+        (.setAttributes term prev-attr)))))
 
