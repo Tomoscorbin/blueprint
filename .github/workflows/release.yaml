@@ -39,13 +39,6 @@ jobs:
             binary_path: bp-macos-arm64
             artifact_name: bp-macos-arm64
 
-          - os: macos
-            arch: amd64
-            runs_on: macos-13
-            binary_name: bp-macos-amd64
-            binary_path: bp-macos-amd64
-            artifact_name: bp-macos-amd64
-
           # ---------- Windows (x64 only) ----------
           - os: windows
             arch: amd64
@@ -67,7 +60,6 @@ jobs:
         with:
           distribution: graalvm-community
           java-version: "21"
-          components: native-image
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Clojure
