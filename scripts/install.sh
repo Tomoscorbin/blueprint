@@ -91,17 +91,29 @@ echo "Downloading ${DOWNLOAD_URL} ..."
 curl -fsSL "${DOWNLOAD_URL}" -o "${TMP_BIN}"
 chmod +x "${TMP_BIN}"
 
-# 6. Choose install dir (prefer ~/.local/bin if on PATH)
-USER_BIN="$HOME/.local/bin"
-SYSTEM_BIN="/usr/local/bin"
-
+# 6. Choose install dir
 if [ -n "${BP_BIN_DIR:-}" ]; then
+  # Caller overrides everything
   BIN_DIR="${BP_BIN_DIR}"
 else
-  if echo ":$PATH:" | tr ':' '\n' | grep -qx "${USER_BIN}"; then
-    BIN_DIR="${USER_BIN}"
+  if [ "$os" = "windows" ]; then
+    # On Windows, default to a per-user dir under LOCALAPPDATA
+    if [ -n "${LOCALAPPDATA:-}" ]; then
+      BIN_DIR="${LOCALAPPDATA}/bp"
+    else
+      # Fallback if LOCALAPPDATA is somehow missing
+      BIN_DIR="${HOME}/.bp"
+    fi
   else
-    BIN_DIR="${SYSTEM_BIN}"
+    # Unix-y behaviour: prefer ~/.local/bin if it's on PATH, else /usr/local/bin
+    USER_BIN="$HOME/.local/bin"
+    SYSTEM_BIN="/usr/local/bin"
+
+    if echo ":$PATH:" | tr ':' '\n' | grep -qx "${USER_BIN}"; then
+      BIN_DIR="${USER_BIN}"
+    else
+      BIN_DIR="${SYSTEM_BIN}"
+    fi
   fi
 fi
 
@@ -118,12 +130,16 @@ fi
 if [ -w "${BIN_DIR}" ]; then
   mv "${TMP_BIN}" "${TARGET}"
 else
-  if command -v sudo >/dev/null 2>&1; then
+  if [ "$os" != "windows" ] && command -v sudo >/dev/null 2>&1; then
     echo "Installing to ${TARGET} (may require sudo)..."
     sudo mv "${TMP_BIN}" "${TARGET}"
   else
-    echo "Directory ${BIN_DIR} is not writable and sudo is not available." >&2
-    echo "Re-run with BP_BIN_DIR pointing to a writable directory (e.g. \$HOME/.local/bin)." >&2
+    echo "Directory ${BIN_DIR} is not writable." >&2
+    if [ "$os" = "windows" ]; then
+      echo "Re-run with BP_BIN_DIR pointing to a writable directory (e.g. %LOCALAPPDATA%\\bp)." >&2
+    else
+      echo "Re-run with BP_BIN_DIR pointing to a writable directory (e.g. \$HOME/.local/bin)." >&2
+    fi
     exit 1
   fi
 fi
