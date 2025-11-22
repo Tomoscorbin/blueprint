@@ -10,22 +10,52 @@ permissions:
 
 jobs:
   build:
-    name: Build ${{ matrix.os }} binary
-    runs-on: ${{ matrix.os }}
+    name: Build ${{ matrix.os }} ${{ matrix.arch }} binary
+    runs-on: ${{ matrix.runs_on }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          # ---------- Linux ----------
+          - os: linux
+            arch: amd64
+            runs_on: ubuntu-latest
             binary_name: bp-linux-amd64
             artifact_name: bp-linux-amd64
-          - os: macos-latest
+
+          - os: linux
+            arch: arm64
+            runs_on: ubuntu-24.04-arm
+            binary_name: bp-linux-arm64
+            artifact_name: bp-linux-arm64
+
+          # ---------- macOS ----------
+          - os: macos
+            arch: arm64
+            runs_on: macos-latest
             binary_name: bp-macos-arm64
             artifact_name: bp-macos-arm64
-          - os: windows-latest
+
+          - os: macos
+            arch: amd64
+            runs_on: macos-13
+            binary_name: bp-macos-amd64
+            artifact_name: bp-macos-amd64
+
+          # ---------- Windows ----------
+          - os: windows
+            arch: amd64
+            runs_on: windows-latest
             binary_name: bp-windows-amd64
             binary_path: bp-windows-amd64.exe
             artifact_name: bp-windows-amd64
+
+          - os: windows
+            arch: arm64
+            runs_on: windows-11-arm
+            binary_name: bp-windows-arm64
+            binary_path: bp-windows-arm64.exe
+            artifact_name: bp-windows-arm64
 
     defaults:
       run:

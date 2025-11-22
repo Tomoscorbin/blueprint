@@ -114,4 +114,3 @@ fi
 
 echo
 echo "Installed ${BINARY_NAME} to ${TARGET}"
-echo "Make sure ${BIN_DIR} is on your PATH, then run: ${BINARY_NAME}"
