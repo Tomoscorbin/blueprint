@@ -9,35 +9,47 @@ echo "Installing blueprint ..."
 # 1. Detect OS
 uname_os="$(uname -s)"
 case "$uname_os" in
-Linux)
-  os="linux"
-  ;;
-Darwin)
-  os="macos"
-  ;;
-MINGW* | MSYS* | CYGWIN* | Windows_NT)
-  os="windows"
-  ;;
-*)
-  echo "Unsupported OS: $uname_os" >&2
-  exit 1
-  ;;
+  Linux)
+    os="linux"
+    ;;
+  Darwin)
+    os="macos"
+    ;;
+  MINGW* | MSYS* | CYGWIN* | Windows_NT)
+    os="windows"
+    ;;
+  *)
+    echo "Unsupported OS: $uname_os" >&2
+    exit 1
+    ;;
 esac
 
 # 2. Detect arch
 uname_arch="$(uname -m)"
 case "$uname_arch" in
-x86_64 | amd64)
-  arch="amd64"
-  ;;
-arm64 | aarch64)
-  arch="arm64"
-  ;;
-*)
-  echo "Unsupported architecture: $uname_arch" >&2
-  echo "Right now only linux-amd64, macos-arm64, and windows-amd64 builds are published." >&2
-  exit 1
-  ;;
+  x86_64 | amd64)
+    arch="amd64"
+    ;;
+  arm64 | aarch64)
+    arch="arm64"
+    ;;
+  *)
+    echo "Unsupported architecture: $uname_arch" >&2
+    echo "Currently published builds: linux-amd64, linux-arm64, macos-arm64, windows-amd64." >&2
+    exit 1
+    ;;
+esac
+
+# 3. Validate supported OS/arch combo
+case "${os}-${arch}" in
+  linux-amd64 | linux-arm64 | macos-arm64 | windows-amd64)
+    # ok
+    ;;
+  *)
+    echo "No prebuilt binary available for ${os}-${arch}." >&2
+    echo "Currently published builds: linux-amd64, linux-arm64, macos-arm64, windows-amd64." >&2
+    exit 1
+    ;;
 esac
 
 ASSET_NAME="${BINARY_NAME}-${os}-${arch}"
@@ -46,7 +58,7 @@ if [ "$os" = "windows" ]; then
   ASSET_NAME="${ASSET_NAME}.exe"
 fi
 
-# 3. Resolve version/tag
+# 4. Resolve version/tag
 VERSION="${BP_VERSION:-latest}"
 
 if [ "$VERSION" = "latest" ]; then
@@ -58,7 +70,11 @@ if [ "$VERSION" = "latest" ]; then
       cut -d '"' -f4
   )
 else
-  TAG="v${VERSION}"
+  # Accept both "0.1.0" and "v0.1.0"
+  case "$VERSION" in
+    v*) TAG="$VERSION" ;;
+    *)  TAG="v${VERSION}" ;;
+  esac
 fi
 
 if [ -z "${TAG:-}" ]; then
@@ -69,13 +85,13 @@ fi
 echo "Using release tag: ${TAG}"
 DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${TAG}/${ASSET_NAME}"
 
-# 4. Download to temp file
+# 5. Download to temp file
 TMP_BIN="$(mktemp)"
 echo "Downloading ${DOWNLOAD_URL} ..."
 curl -fsSL "${DOWNLOAD_URL}" -o "${TMP_BIN}"
 chmod +x "${TMP_BIN}"
 
-# 5. Choose install dir (prefer ~/.local/bin if on PATH)
+# 6. Choose install dir (prefer ~/.local/bin if on PATH)
 USER_BIN="$HOME/.local/bin"
 SYSTEM_BIN="/usr/local/bin"
 
@@ -98,7 +114,7 @@ else
   TARGET="${BIN_DIR}/${BINARY_NAME}"
 fi
 
-# 6. Move into place (sudo only if needed)
+# 7. Move into place (sudo only if needed)
 if [ -w "${BIN_DIR}" ]; then
   mv "${TMP_BIN}" "${TARGET}"
 else
