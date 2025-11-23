@@ -9,11 +9,21 @@ $binaryName = "bp"
 
 Write-Host "Installing $binaryName for Windows..."
 
-# 1. Determine arch
-$arch = switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture) {
-    "X64"   { "amd64" }
-    "Arm64" { "arm64" }
-    default { throw "Unsupported architecture: $_" }
+# 1. Determine OS architecture
+$osArch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
+Write-Host "Detected OS architecture: $osArch"
+
+switch ($osArch.ToString()) {
+    "X64" {
+        $arch = "amd64"
+    }
+    "Arm64" {
+        # Only keep this if/when you actually publish a windows-arm64 binary
+        $arch = "arm64"
+    }
+    default {
+        throw "Unsupported Windows architecture: $osArch. Currently supported: X64 (and Arm64 if available)."
+    }
 }
 
 # 2. Resolve release
