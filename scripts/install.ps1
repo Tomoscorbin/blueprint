@@ -10,18 +10,17 @@ $binaryName = "bp"
 
 Write-Host "Installing $binaryName for Windows..."
 
-# 1. Determine OS architecture (we currently only support 64-bit Windows)
-$osArch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
-Write-Host "Detected OS architecture: $osArch"
+# 1. Determine OS architecture using Win32_OperatingSystem (works on your machine)
+$osInfo        = Get-CimInstance Win32_OperatingSystem
+$osArchString  = $osInfo.OSArchitecture  # e.g. "64-bit" or "32-bit"
+Write-Host "Detected OS architecture: $osArchString"
 
-switch ($osArch) {
-    "X64" {
-        $arch = "amd64"
-    }
-    default {
-        throw "Unsupported Windows architecture: $osArch. Currently only 64-bit (X64) Windows is supported."
-    }
+if ($osArchString -notlike "*64*") {
+    throw "Unsupported Windows architecture: $osArchString. Currently only 64-bit Windows is supported."
 }
+
+# We know we're on 64-bit Windows
+$arch = "amd64"
 
 # 2. Prepare GitHub API headers
 $headers = @{ "User-Agent" = "$binaryName-installer" }
@@ -67,7 +66,6 @@ if (-not [string]::IsNullOrWhiteSpace($env:BP_BIN_DIR)) {
 }
 
 New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
-
 $target = Join-Path $targetDir "$binaryName.exe"
 
 # 6. Download the binary
