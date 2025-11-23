@@ -10,16 +10,9 @@ $binaryName = "bp"
 
 Write-Host "Installing $binaryName for Windows..."
 
-# 1. Determine OS architecture using Win32_OperatingSystem (works on your machine)
-$osInfo        = Get-CimInstance Win32_OperatingSystem
-$osArchString  = $osInfo.OSArchitecture  # e.g. "64-bit" or "32-bit"
-Write-Host "Detected OS architecture: $osArchString"
-
-if ($osArchString -notlike "*64*") {
-    throw "Unsupported Windows architecture: $osArchString. Currently only 64-bit Windows is supported."
-}
-
-# We know we're on 64-bit Windows
+# 1. We currently only publish a 64-bit (amd64) Windows binary.
+#    Trying to outsmart Windows architecture detection has caused more issues than it solves,
+#    so we simply target the amd64 asset.
 $arch = "amd64"
 
 # 2. Prepare GitHub API headers
