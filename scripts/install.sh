@@ -91,7 +91,35 @@ echo "Downloading ${DOWNLOAD_URL} ..."
 curl -fsSL "${DOWNLOAD_URL}" -o "${TMP_BIN}"
 chmod +x "${TMP_BIN}"
 
-# 6. Choose install dir (prefer ~/.local/bin if on PATH)
+# --- Windows install path ---------------------------------------------------
+if [ "$os" = "windows" ]; then
+  # On Windows we always install to a user-local directory.
+  # BP_BIN_DIR can override, otherwise default to $HOME/.local/bin.
+  BIN_DIR="${BP_BIN_DIR:-$HOME/.local/bin}"
+  mkdir -p "$BIN_DIR"
+
+  TARGET="${BIN_DIR}/${BINARY_NAME}.exe"
+  mv "${TMP_BIN}" "${TARGET}"
+
+  echo
+  echo "Installed ${BINARY_NAME} to ${TARGET}"
+
+  # Try to show a Windows-style path for PATH instructions
+  if command -v cygpath >/dev/null 2>&1; then
+    WIN_DIR="$(cygpath -w "$BIN_DIR")"
+    echo
+    echo "To use 'bp' from PowerShell/cmd, add this directory to your Windows PATH:"
+    echo "  $WIN_DIR"
+  else
+    echo
+    echo "Make sure the directory containing bp.exe is on your PATH."
+  fi
+
+  exit 0
+fi
+
+# --- Unix install path (Linux / macOS) --------------------------------------
+
 USER_BIN="$HOME/.local/bin"
 SYSTEM_BIN="/usr/local/bin"
 
@@ -107,12 +135,7 @@ fi
 
 mkdir -p "${BIN_DIR}"
 
-# On Windows, install as bp.exe; elsewhere just bp
-if [ "$os" = "windows" ]; then
-  TARGET="${BIN_DIR}/${BINARY_NAME}.exe"
-else
-  TARGET="${BIN_DIR}/${BINARY_NAME}"
-fi
+TARGET="${BIN_DIR}/${BINARY_NAME}"
 
 # 7. Move into place (sudo only if needed)
 if [ -w "${BIN_DIR}" ]; then
