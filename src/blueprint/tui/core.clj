@@ -5,6 +5,23 @@
   - `prompt-answers!` – run the interactive flow and return an answers map."
   (:require [lanterna.terminal :as t]))
 
+
+(defn- windows?
+  []
+  (-> (System/getProperty "os.name")
+      .toLowerCase
+      (.contains "win")))
+
+(defn- make-terminal
+  "Return a Lanterna terminal appropriate for the OS.
+   - On Unix/macOS: text console.
+   - On Windows: let Lanterna pick (usually Swing), avoiding Cygwin/stty.exe."
+  []
+  (if (windows?)
+    (t/get-terminal :auto)   ;; or :swing if you want to *force* a Swing window
+    (t/get-terminal :text)))
+
+
 ;; -----------------------------
 ;; Options (label + key)
 ;; -----------------------------
@@ -200,20 +217,14 @@
 ;; -----------------------------
 
 (defn prompt-answers!
-  "Collect the high-level project configuration from the user using a lanterna TUI.
-
-  Returns a map compatible with the old `prompt-answers!` contract:
-    {:project-name string
-     :ci-provider  keyword
-     :project-type keyword
-     :hostname     string?}  ;; only when project-type is :dabs"
   []
-  (let [term (t/get-terminal :text)
+  (let [term (make-terminal)
         {:keys [project-name ci-provider project-type databricks-host]}
         (t/in-terminal term
-                       (collect-answers-in-terminal! term))]
+          (collect-answers-in-terminal! term))]
     (cond-> {:project-name project-name
              :ci-provider  ci-provider
              :project-type project-type}
       databricks-host (assoc :hostname databricks-host))))
+
 
