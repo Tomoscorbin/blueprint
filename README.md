@@ -45,7 +45,6 @@ BP_BIN_DIR="$HOME/.local/bin" \
 From PowerShell:
 
 ```Powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 irm https://raw.githubusercontent.com/tomoscorbin/blueprint/main/scripts/install.ps1 | iex
 ```
 
