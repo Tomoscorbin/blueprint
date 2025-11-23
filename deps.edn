@@ -4,7 +4,8 @@
         org.jline/jline {:mvn/version "3.30.6"}
         org.jline/jline-reader   {:mvn/version "3.30.6"}
         org.jline/jline-terminal {:mvn/version "3.30.6"}
-        com.github.clj-easy/graal-build-time {:mvn/version "1.0.5"}}
+        com.github.clj-easy/graal-build-time {:mvn/version "1.0.5"}
+        clojure-lanterna/clojure-lanterna {:mvn/version "0.9.7"}}
 
  :aliases
  {:run-m {:main-opts ["-m" "blueprint"]}

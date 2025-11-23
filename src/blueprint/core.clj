@@ -15,34 +15,6 @@
    [blueprint.exec :as exec]
    [blueprint.tui.core :as tui]))
 
-(defn- prompt-answers!
-  "Interactively collect the high-level project configuration from the user.
-
-  Asks, in order:
-  - Project name
-  - CI provider
-  - Project type
-  - Databricks host name (only when project type is :dabs)
-
-  Returns:
-  - A map with at least:
-      {:project-name string
-       :ci-provider  keyword
-       :project-type keyword}
-    and, for :dabs projects, also:
-      {:hostname string}"
-  []
-  (let [project-name (tui/ask-project-name!)
-        ci-provider  (tui/choose-ci-provider!)
-        project-type (tui/choose-project-type!)]
-    (cond-> {:project-name project-name
-             :ci-provider  ci-provider
-             :project-type project-type}
-
-      ;; Only ask for hostname when project-type is :dabs
-      (= project-type :dabs)
-      (assoc :hostname (tui/ask-databricks-host!)))))
-
 (defn- generate-project!
   "Given the collected `answers` map, plan and materialise the project on disk.
 
@@ -70,12 +42,10 @@
   [& args]
   (let [[cmd & _] args]
     (case cmd
-      ;; happy path: bp init
       "init"
-      (-> (prompt-answers!)
+      (-> (tui/prompt-answers!)
           (generate-project!))
 
-      ;; help commands
       "--help"
       (do (print-usage)
           (System/exit 0))
@@ -84,7 +54,6 @@
       (do (print-usage)
           (System/exit 0))
 
-      ;; default / no command / unknown command
       (do
         (when cmd
           (println "Unknown command:" cmd)

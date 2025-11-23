@@ -216,4 +216,3 @@
              :ci-provider  ci-provider
              :project-type project-type}
       databricks-host (assoc :hostname databricks-host))))
-
