@@ -17,9 +17,11 @@ An opinionated CLI for spinning up data engineering projects. It takes care of b
 - 📚 Docs: generated projects include markdown guides explaining how packaging,
   CI, versioning, and Databricks bundles are wired
 
-## Installation
+## Requirements
 
 The generated Python projects assume [`uv`](https://docs.astral.sh/uv/) is already installed and available on your `PATH`.
+
+## Installation
 
 ### Linux / macOS
 
@@ -30,7 +32,7 @@ curl -fsSL https://raw.githubusercontent.com/tomoscorbin/blueprint/main/scripts/
 
 ```
 
-This will download the appropriate binary for your platform and place it in a directory on your PATH
+This will download the binary and place it in a directory on your PATH
 (by default `~/.local/bin` if present, otherwise `/usr/local/bin`). You can override the target directory with BP_BIN_DIR:
 
 ```bash
