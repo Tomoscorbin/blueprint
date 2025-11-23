@@ -74,8 +74,10 @@ jobs:
             ~/.m2/repository
             ~/.gitlibs
             .cpcache
-          key: cljdeps-${{ runner.os }}-${{ hashFiles('deps.edn') }}
-          restore-keys: cljdeps-
+          key: cljdeps-${{ runner.os }}-${{ github.ref_name }}
+          restore-keys: |
+            cljdeps-${{ runner.os }}-
+            cljdeps-
 
       - name: Build uberjar
         run: clojure -T:build uber
