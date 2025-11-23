@@ -1,4 +1,5 @@
 param(
+    # "latest" or an explicit version like "0.1.0" or "v0.1.0"
     [string]$Version = "latest"
 )
 
@@ -9,53 +10,76 @@ $binaryName = "bp"
 
 Write-Host "Installing $binaryName for Windows..."
 
-# 1. Determine OS architecture
+# 1. Determine OS architecture (we currently only support 64-bit Windows)
 $osArch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture
 Write-Host "Detected OS architecture: $osArch"
 
-switch ($osArch.ToString()) {
+switch ($osArch) {
     "X64" {
         $arch = "amd64"
     }
-    "Arm64" {
-        # Only keep this if/when you actually publish a windows-arm64 binary
-        $arch = "arm64"
-    }
     default {
-        throw "Unsupported Windows architecture: $osArch. Currently supported: X64 (and Arm64 if available)."
+        throw "Unsupported Windows architecture: $osArch. Currently only 64-bit (X64) Windows is supported."
     }
 }
 
-# 2. Resolve release
+# 2. Prepare GitHub API headers
+$headers = @{ "User-Agent" = "$binaryName-installer" }
+
+# 3. Resolve release metadata from GitHub
 if ($Version -eq "latest") {
     Write-Host "Resolving latest release from GitHub..."
-    $release = Invoke-RestMethod "https://api.github.com/repos/$repo/releases/latest"
+    $release = Invoke-RestMethod `
+        -Uri "https://api.github.com/repos/$repo/releases/latest" `
+        -Headers $headers
 } else {
     if ($Version -notmatch '^v') { $Version = "v$Version" }
     Write-Host "Resolving release $Version from GitHub..."
-    $release = Invoke-RestMethod "https://api.github.com/repos/$repo/releases/tags/$Version"
+    $release = Invoke-RestMethod `
+        -Uri "https://api.github.com/repos/$repo/releases/tags/$Version" `
+        -Headers $headers
 }
 
+if (-not $release) {
+    throw "Failed to fetch release metadata from GitHub."
+}
+
+if (-not $release.assets) {
+    throw "Release '$($release.tag_name)' does not contain any assets."
+}
+
+# 4. Find the correct asset for this platform
 $assetName = "$binaryName-windows-$arch.exe"
 $asset     = $release.assets | Where-Object { $_.name -eq $assetName }
 
 if (-not $asset) {
-    throw "Could not find asset '$assetName' in release '$($release.tag_name)'."
+    $available = ($release.assets | Select-Object -ExpandProperty name) -join ", "
+    throw "Could not find asset '$assetName' in release '$($release.tag_name)'. Available assets: $available"
 }
 
-# 3. Download to %LOCALAPPDATA%\bp\bp.exe
-$targetDir = Join-Path $env:LOCALAPPDATA "bp"
-$target    = Join-Path $targetDir "bp.exe"
+# 5. Decide install directory
+#    - Use BP_BIN_DIR if set
+#    - Otherwise default to %LOCALAPPDATA%\bp
+if (-not [string]::IsNullOrWhiteSpace($env:BP_BIN_DIR)) {
+    $targetDir = $env:BP_BIN_DIR
+} else {
+    $targetDir = Join-Path $env:LOCALAPPDATA $binaryName
+}
 
-Write-Host "Downloading $assetName ..."
 New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
-Invoke-WebRequest $asset.browser_download_url -OutFile $target
+
+$target = Join-Path $targetDir "$binaryName.exe"
+
+# 6. Download the binary
+Write-Host "Downloading $assetName to $target ..."
+Invoke-WebRequest `
+    -Uri $asset.browser_download_url `
+    -Headers $headers `
+    -OutFile $target
 
 Write-Host ""
-Write-Host "Installed bp to: $target"
+Write-Host "Installed $binaryName to: $target"
 Write-Host ""
-Write-Host "Add this directory to your user PATH if it's not already there:"
-Write-Host "  $targetDir"
-Write-Host ""
-Write-Host "Then open a new PowerShell and run:"
+Write-Host "If '$targetDir' is not already on your PATH, add it to your user PATH,"
+Write-Host "then open a new PowerShell window and run:"
 Write-Host "  bp --help"
