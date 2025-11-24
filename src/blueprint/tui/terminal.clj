@@ -8,9 +8,20 @@
   (:import
    [org.jline.terminal TerminalBuilder Terminal]))
 
-;; ----- Constants -----------------------------------------------------------
+(def esc
+  "ANSI escape prefix used for constructing control sequences."
+  "\u001b[")
 
-(def ^:private esc "\u001b[")
+(defn green-bold
+  "Wrap `s` in a bold green SGR sequence."
+  [s]
+  (str esc "1;32m" s esc "0m"))
+
+(defn print-ansi!
+  "Print a raw ANSI sequence (or plain text) and flush immediately."
+  [& parts]
+  (print (apply str parts))
+  (flush))
 
 ;; ----- Environment / OS detection -----------------------------------------
 
@@ -31,12 +42,6 @@
   []
   (and (windows?) (msys?)))
 
-(defn- plain-windows-console?
-  "True when running on a plain Windows console (cmd/PowerShell/Windows Terminal)
-   rather than an MSYS / Git Bash environment."
-  []
-  (and (windows?) (not (msys?))))
-
 ;; ----- Terminal construction -----------------------------------------------
 
 (defn- build-terminal
@@ -50,20 +55,12 @@
   ^Terminal
   []
   (let [builder (doto (TerminalBuilder/builder)
-                  ;; Always wrap the real process terminal.
                   (.system true)
-                  ;; If a system terminal can't be created, use a dumb one
-                  ;; instead of failing with \"Unable to create a system terminal\".
                   (.dumb true))]
     (when (windows?)
       (try
-        ;; For Windows / Cygwin / MSYS JLine’s own docs recommend the native
-        ;; (JNI / FFM) providers for proper behaviour.
         (.provider builder "jni")
-        (catch Throwable _
-          ;; If the JNI provider is not on the classpath, just fall back to the
-          ;; default provider selection.
-          )))
+        (catch Throwable _)))
     (.build builder)))
 
 (def ^:private terminal*
@@ -90,30 +87,41 @@
 
 (defn ansi-capable?
   "Return true if this environment is one where ANSI escape sequences are
-  generally safe and likely to be interpreted correctly.
-
-  Heuristic:
-  - Exclude 'dumb' terminals (redirected IO / CI).
-  - On non-Windows, assume ANSI capable.
-  - On Windows + MSYS (Git Bash / mintty), assume ANSI capable.
-  - On plain Windows consoles (PowerShell/cmd without MSYS), treat as non-ANSI."
+  generally safe and likely to be interpreted correctly."
   []
   (and (not (dumb-terminal?))
        (or (not (windows?))
            (windows-mintty?))))
 
 (defn arrow-menu-supported?
-  "Return true if we are happy to use the arrow-key TUI.
-
-  Rules:
-  - Only on non-dumb terminals.
-  - On non-Windows, enable the arrow menu (Linux/macOS).
-  - On Windows + MSYS (Git Bash), enable the arrow menu.
-  - On plain Windows consoles (PowerShell/cmd without MSYS), disable it."
+  "Return true if we are happy to use the arrow-key TUI."
   []
   (and (not (dumb-terminal?))
        (or (not (windows?))
            (windows-mintty?))))
+
+;; ----- Low-level cursor/line helpers --------------------------------------
+
+(defn save-cursor!
+  "Save the current cursor position using ANSI, if supported."
+  []
+  (when (ansi-capable?)
+    (print (str esc "s"))
+    (flush)))
+
+(defn restore-cursor!
+  "Restore the cursor to the last saved position using ANSI, if supported."
+  []
+  (when (ansi-capable?)
+    (print (str esc "u"))
+    (flush)))
+
+(defn clear-line!
+  "Clear the entire current line using ANSI, if supported."
+  []
+  (when (ansi-capable?)
+    (print (str esc "2K"))
+    (flush)))
 
 ;; ----- Styling / question helpers ------------------------------------------
 
@@ -124,24 +132,15 @@
   unchanged."
   [s]
   (if (ansi-capable?)
-    (str esc "1;32m" s esc "0m")
+    (green-bold s)
     s))
 
 (defn rewrite-prev-line!
-  "Rewrite the previous terminal line with string `s`.
-
-  On ANSI-capable terminals:
-  - Move the cursor up one line,
-  - Clear it,
-  - Print `s`, then move to a new line.
-
-  On non-ANSI terminals, this is a no-op."
+  "Rewrite the previous terminal line with string `s`."
   [s]
   (when (ansi-capable?)
-    (print (str esc "1A"        ; cursor up one line
-                "\r"            ; carriage return
-                esc "2K"        ; clear entire line
-                s
-                "\n"))
-    (flush))
+    ;; Move cursor up one line, carriage return, clear it, then print s + newline.
+    (print-ansi! esc "1A" "\r")
+    (clear-line!)
+    (print-ansi! s "\n"))
   nil)

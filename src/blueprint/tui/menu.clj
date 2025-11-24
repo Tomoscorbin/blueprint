@@ -72,56 +72,26 @@
   {final-up-arrow-code   :up
    final-down-arrow-code :down})
 
-(def ^:private esc
-  "ANSI escape prefix used for constructing control sequences."
-  "\u001b[")
-
 (def ^:private pointer
   "Menu pointer symbol; uses ASCII on Windows to avoid Unicode rendering issues."
   (if (term/windows?) ">" "▶"))
-
-(defn- print-ansi!
-  "Print a raw ANSI sequence (or plain text) and flush immediately."
-  [& parts]
-  (print (apply str parts))
-  (flush))
-
-(defn- save-cursor!
-  "Save the current cursor position using an ANSI escape sequence."
-  []
-  (print-ansi! esc "s"))
-
-(defn- restore-cursor!
-  "Restore the cursor to the last saved position."
-  []
-  (print-ansi! esc "u"))
-
-(defn- clear-line!
-  "Clear the entire current line."
-  []
-  (print-ansi! esc "2K"))
 
 (defn- goto-line!
   "Move the cursor to line `n` relative to the saved cursor position.
    Lines are 1-based, so n=1 means 'saved cursor line'."
   [n]
-  (restore-cursor!)
+  (term/restore-cursor!)
   (when (> n 1)
     ;; 'E' moves down by the given number of lines, to column 1.
-    (print-ansi! esc (dec n) "E")))
-
-(defn- green-bold
-  "Wrap `s` in a bold green SGR sequence."
-  [s]
-  (str esc "1;32m" s esc "0m"))
+    (term/print-ansi! term/esc (dec n) "E")))
 
 (defn- print-option!
   "Print a single menu option line at the current cursor position,
    clearing the line first and applying highlighting if selected."
   [label selected?]
-  (clear-line!)
+  (term/clear-line!)
   (if selected?
-    (println (str pointer " " (green-bold label)))
+    (println (str pointer " " (term/green-bold label)))
     (println label))
   (flush))
 
@@ -131,7 +101,7 @@
   [line-count]
   ;; Go to first option line relative to the saved cursor, then delete n lines.
   (goto-line! 2)
-  (print-ansi! esc line-count "M")) ; CSI n M (DL = Delete Line)
+  (term/print-ansi! term/esc line-count "M")) ; CSI n M (DL = Delete Line)
 
 ;; --- Rendering block for arrow menu ----------------------------------------
 
@@ -256,7 +226,7 @@
         prev-attr   (.enterRawMode t)]
     (try
       ;; initial render
-      (save-cursor!)
+      (term/save-cursor!)
       (render-options-block! options-vec 0)
       (goto-line! (inc line-count))
       (println)
