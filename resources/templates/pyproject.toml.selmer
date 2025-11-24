@@ -14,8 +14,8 @@ dev = [
   "mypy",
   "commitizen",
   "pre-commit",
-  {% if project_type = :dabs %}"delta-spark=={{ databricks_delta_version }}"{% endif %},
-  {% if project_type = :dabs %}"databricks-connect"{% endif %},
+  {% if project_type = :dabs %}"delta-spark=={{ databricks_delta_version }}",{% endif %}
+  {% if project_type = :dabs %}"databricks-connect",{% endif %}
 ]
 
 [project.scripts]
