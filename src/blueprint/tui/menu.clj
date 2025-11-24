@@ -3,109 +3,105 @@
    and JLine for raw input where supported.
 
    Behaviour:
-   - On 'arrow-menu-supported' terminals (Linux/macOS terminals, Windows Terminal / PowerShell),
+   - On arrow-menu-supported terminals (Linux/macOS terminals, Git Bash),
      we use an arrow-key menu.
-   - On MSYS / Git Bash and 'dumb' terminals, we fall back to a numeric menu."
+   - On plain Windows consoles, we fall back to a numeric menu."
   (:require
-   [clojure.string :as str])
+   [clojure.string :as str]
+   [blueprint.tui.terminal :as term])
   (:import
-   [org.jline.terminal TerminalBuilder Terminal]))
+   [org.jline.terminal Terminal]))
 
-;; --- Environment / terminal detection --------------------------------------
+(def ^:private zero-code
+  "Integer code point for character '0'."
+  48)
 
-(def ^:private windows?
-  (-> (System/getProperty "os.name")
-      (.toLowerCase)
-      (.contains "win")))
+(def ^:private nine-code
+  "Integer code point for character '9'."
+  57)
 
-(defn- msys? []
-  ;; Present in Git Bash / MSYS environments on Windows
-  (some? (System/getenv "MSYSTEM")))
+(def ^:private semicolon-code
+  "Integer code point for character ';'."
+  59)
 
-(def ^:private ^Terminal terminal
-  (delay
-    (let [builder (TerminalBuilder/builder)]
-      (-> builder
-          ;; On plain Windows consoles, use the system terminal integration.
-          ;; On MSYS / Git Bash, avoid the Windows system terminal and treat it
-          ;; as an external terminal.
-          (.system (not (msys?)))
-          (.streams System/in System/out)
-          (.build)))))
+(def ^:private enter-key-codes
+  "Integer key codes that should be treated as Enter (CR and LF)."
+  #{13 10})
 
-(defn- arrow-menu-supported?
-  "Return true if this terminal is one where we are happy to use the arrow-key TUI.
+(def ^:private escape-key-code
+  "Integer key code for the Escape key."
+  27)
 
-  We explicitly disable the arrow menu on:
-  - MSYS / Git Bash (MSYSTEM set), where key handling is flaky
-  - 'dumb' terminals reported by JLine."
-  [^Terminal term]
-  (let [t (.getType term)]
-    (and (not (msys?))
-         (not= "dumb" t))))
+(def ^:private eof-code
+  "Reader EOF sentinel; JLine returns -1 when the input stream is closed."
+  -1)
 
-;; --- ANSI helpers ----------------------------------------------------------
+(def ^:private csi-int
+  "Second byte for CSI-based arrow-key escape sequences: ESC [ ..."
+  91) ; '['
 
-(def ^:private esc "\u001b[")
+(def ^:private ss3-int
+  "Second byte for SS3-based (application mode) arrow-key sequences: ESC O ..."
+  79) ; 'O'
 
-(defn- save-cursor!    [] (print (str esc "s")) (flush))
-(defn- restore-cursor! [] (print (str esc "u")) (flush))
-(defn- clear-line!     [] (print (str esc "2K")) (flush))
+(def ^:private final-up-arrow-code
+  "Final byte for the Up arrow ANSI sequence (A/B/C/D)."
+  65) ; 'A'
+
+(def ^:private final-down-arrow-code
+  "Final byte for the Down arrow ANSI sequence (A/B/C/D)."
+  66) ; 'B'
+
+(def ^:private final-right-arrow-code
+  "Final byte for the Right arrow ANSI sequence (A/B/C/D)."
+  67) ; 'C'
+
+(def ^:private final-left-arrow-code
+  "Final byte for the Left arrow ANSI sequence (A/B/C/D)."
+  68) ; 'D'
+
+(def ^:private arrow-final-codes
+  "Set of all recognised final arrow-key codes (we only map up/down)."
+  #{final-up-arrow-code
+    final-down-arrow-code
+    final-right-arrow-code
+    final-left-arrow-code})
+
+(def ^:private final-arrow-code->direction
+  "Mapping from final arrow-key byte code to the up/down directions."
+  {final-up-arrow-code   :up
+   final-down-arrow-code :down})
+
+(def ^:private pointer
+  "Menu pointer symbol; uses ASCII on Windows to avoid Unicode rendering issues."
+  (if (term/windows?) ">" "▶"))
 
 (defn- goto-line!
   "Move the cursor to line `n` relative to the saved cursor position.
    Lines are 1-based, so n=1 means 'saved cursor line'."
   [n]
-  (restore-cursor!)
+  (term/restore-cursor!)
   (when (> n 1)
     ;; 'E' moves down by the given number of lines, to column 1.
-    (print (str esc (dec n) "E")))
-  (flush))
-
-(defn- green-bold [s]
-  (str esc "1;32m" s esc "0m"))
-
-(def ^:private pointer
-  ;; Use a simple ASCII pointer on Windows to avoid Unicode rendering issues
-  (if windows? ">" "▶"))
+    (term/print-ansi! term/esc (dec n) "E")))
 
 (defn- print-option!
   "Print a single menu option line at the current cursor position,
    clearing the line first and applying highlighting if selected."
   [label selected?]
-  (clear-line!)
+  (term/clear-line!)
   (if selected?
-    (println (str pointer " " (green-bold label)))
-    (println label))) ; no indent on unselected
-
-(defn- delete-options-block!
-  "Delete `n` lines of menu output starting from the first option line
-   (relative to the saved cursor)."
-  [n]
-  ;; go to first option line relative to the saved cursor, then delete n lines
-  (goto-line! 2)
-  (print (str esc n "M")) ; CSI n M  (DL = Delete Line)
+    (println (str pointer " " (term/green-bold label)))
+    (println label))
   (flush))
 
-;; --- Validation ------------------------------------------------------------
-
-(defn- valid-option?
-  "Return true if x is a [keyword label] pair."
-  [x]
-  (and (vector? x)
-       (= 2 (count x))
-       (keyword? (first x))
-       (string? (second x))))
-
-(defn- validate-options!
-  "Ensure options is a non-empty sequence of [keyword label] pairs."
-  [options]
-  (when (or (not (sequential? options))
-            (empty? options)
-            (not (every? valid-option? options)))
-    (throw (ex-info "options must be a non-empty sequence of [keyword label] pairs"
-                    {:options options})))
-  options)
+(defn- delete-options-block!
+  "Delete `line-count` lines of menu output starting from the first option line
+   (relative to the saved cursor)."
+  [line-count]
+  ;; Go to first option line relative to the saved cursor, then delete n lines.
+  (goto-line! 2)
+  (term/print-ansi! term/esc line-count "M")) ; CSI n M (DL = Delete Line)
 
 ;; --- Rendering block for arrow menu ----------------------------------------
 
@@ -115,13 +111,81 @@
   `options-vec` is a vector of [key label] pairs.
   `selected-index` is the index of the currently selected option."
   [options-vec selected-index]
-  ;; first option line is 2 lines below saved cursor (blank line between prompt and menu)
+  ;; First option line is 2 lines below saved cursor
+  ;; (blank line between prompt and menu).
   (goto-line! 2)
   (doseq [[i [_ label]] (map-indexed vector options-vec)]
-    (print-option! label (= i selected-index)))
-  (flush))
+    (print-option! label (= i selected-index))))
+
+;; --- Escape-sequence / key handling ----------------------------------------
+
+(defn- digit-or-semicolon?
+  "Return true if c is the code point for '0'-'9' or ';'."
+  [c]
+  (or (and (>= c zero-code) (<= c nine-code))
+      (= c semicolon-code)))
+
+(defn- read-arrow-key
+  "Assuming the initial ESC has already been read, consume the rest of an
+  arrow-key sequence from `read-ch` and return a high-level direction:
+
+  - :up, :down for recognised arrows
+  - nil if the sequence is not recognised or incomplete"
+  [read-ch]
+  (let [c2 (read-ch)]
+    (if (or (= c2 csi-int)   ; ESC [ ...
+            (= c2 ss3-int))  ; ESC O ...
+      (let [final (loop [c (read-ch)]
+                    (cond
+                      ;; end-of-stream or error → give up
+                      (or (nil? c) (= c eof-code))
+                      nil
+
+                      ;; final arrow keys: A/B/C/D
+                      (arrow-final-codes c)
+                      c
+
+                      ;; if we see digits or ';', keep reading (e.g. ESC [ 1 ; 5 A)
+                      (digit-or-semicolon? c)
+                      (recur (read-ch))
+
+                      ;; something else we don't understand → give up
+                      :else
+                      nil))]
+        ;; Only up/down are mapped; left/right still result in nil.
+        (when final
+          (get final-arrow-code->direction final)))
+      ;; Not a CSI/SS3 sequence we care about.
+      nil)))
+
+(defn- read-key-event
+  "Read a single high-level key event from the terminal via `read-ch`.
+
+  Returns one of:
+  - :enter
+  - :up
+  - :down
+  - :other (anything else)"
+  [read-ch]
+  (let [ch (read-ch)]
+    (cond
+      ;; Enter: CR or LF
+      (contains? enter-key-codes ch)
+      :enter
+
+      ;; ESC … (arrow keys etc.)
+      (= ch escape-key-code)
+      (or (read-arrow-key read-ch) :other)
+
+      :else
+      :other)))
 
 ;; --- Arrow-key menu core ---------------------------------------------------
+
+(defn- option-key-at
+  "Return the option keyword at `index` in `options-vec`."
+  [options-vec index]
+  (-> options-vec (nth index) first))
 
 (defn- run-menu-loop
   "Core menu loop: reads key codes via `read-ch`, tracks selected index,
@@ -130,52 +194,41 @@
 
   `options-vec` must be a vector of [key label] pairs."
   [options-vec read-ch render!]
-  (loop [idx 0]
-    (let [ch (read-ch)]
-      (cond
-        ;; Enter: return key of current option
-        (= ch 13)                           ; Enter
-        (first (nth options-vec idx))
+  (let [last-index (dec (count options-vec))]
+    (loop [selected-index 0]
+      (case (read-key-event read-ch)
+        :enter
+        (option-key-at options-vec selected-index)
 
-        ;; ESC [ A/B (arrow keys)
-        (= ch 27)                           ; ESC
-        (let [c2 (read-ch)]
-          (if (= c2 91)                     ; '['
-            (let [c3 (read-ch)]
-              (case c3
-                ;; up
-                65 (let [new (max 0 (dec idx))]
-                     (when (not= new idx)
-                       (render! new))
-                     (recur new))
-                ;; down
-                66 (let [new (min (dec (count options-vec)) (inc idx))]
-                     (when (not= new idx)
-                       (render! new))
-                     (recur new))
-                ;; unknown escape sequence: ignore
-                (recur idx)))
-            ;; not an ESC-[ sequence: ignore
-            (recur idx)))
+        :up
+        (let [new-index (max 0 (dec selected-index))]
+          (when (not= new-index selected-index)
+            (render! new-index))
+          (recur new-index))
 
-        ;; all other keys ignore and keep current selection
-        :else
-        (recur idx)))))
+        :down
+        (let [new-index (min last-index (inc selected-index))]
+          (when (not= new-index selected-index)
+            (render! new-index))
+          (recur new-index))
+
+        ;; :other
+        (recur selected-index)))))
 
 (defn- create-arrow-menu!
   "Arrow-key menu implementation for arrow-menu-supported terminals."
   [options]
-  (validate-options! options)
   (let [options-vec (vec options)
-        lines       (inc (count options-vec)) ; blank line + options
-        ^Terminal term @terminal
-        rdr         (.reader term)
-        prev-attr   (.enterRawMode term)]
+        ;; blank line + options
+        line-count  (inc (count options-vec))
+        ^Terminal t (term/terminal)
+        rdr         (.reader t)
+        prev-attr   (.enterRawMode t)]
     (try
       ;; initial render
-      (save-cursor!)
+      (term/save-cursor!)
       (render-options-block! options-vec 0)
-      (goto-line! (inc lines))
+      (goto-line! (inc line-count))
       (println)
       (flush)
 
@@ -186,22 +239,29 @@
         (run-menu-loop options-vec read-ch render!))
 
       (finally
-        (delete-options-block! lines)
-        (.setAttributes term prev-attr)))))
-;; NOTE:
-;; - JLine owns the Reader returned by (.reader term).
-;; - Closing it here can race with internal reader threads (e.g. WindowsStreamPump)
-;;   and cause IOExceptions on shutdown.
-;; - We therefore never close `rdr` ourselves; we just restore the previous attributes.
+        (delete-options-block! line-count)
+        (.setAttributes t prev-attr)))))
 
 ;; --- Fallback numeric menu -------------------------------------------------
 
+(defn- parse-choice
+  "Parse a 1-based numeric choice from `s`, returning zero-based index or
+   ::invalid on failure."
+  [s]
+  (try
+    (let [trimmed (str/trim s)
+          n       (Integer/parseInt trimmed)
+          idx     (dec n)]
+      idx)
+    (catch Exception _
+      ::invalid)))
+
 (defn- create-fallback-menu!
-  "Numeric menu for terminals where raw keys aren't reliable (e.g. Git Bash/MSYS,
-   'dumb' terminals, CI)."
+  "Numeric menu for terminals where raw keys aren't reliable (e.g. plain
+   Windows consoles)."
   [options]
-  (validate-options! options)
-  (let [options-vec (vec options)]
+  (let [options-vec (vec options)
+        max-index   (dec (count options-vec))]
     (loop []
       (println)
       (doseq [[i [_ label]] (map-indexed vector options-vec)]
@@ -209,13 +269,10 @@
       (print (format "Enter choice [1-%d]: " (count options-vec)))
       (flush)
       (let [input (read-line)
-            idx   (try
-                    (dec (Integer/parseInt (str/trim input)))
-                    (catch Exception _
-                      ::invalid))]
+            idx   (parse-choice input)]
         (if (and (integer? idx)
-                 (<= 0 idx (dec (count options-vec))))
-          (first (nth options-vec idx))
+                 (<= 0 idx max-index))
+          (option-key-at options-vec idx)
           (do
             (println "Invalid choice, try again.")
             (recur)))))))
@@ -225,13 +282,11 @@
 (defn create-menu!
   "Render an inline menu.
 
-  On arrow-menu-supported terminals (Linux/macOS terminals, Windows Terminal / PowerShell),
+  On arrow-menu-supported terminals (Linux/macOS terminals, Git Bash),
   this is an arrow-key-driven menu.
 
-  On MSYS / Git Bash and 'dumb' terminals, this falls back to a numeric menu."
+  On plain Windows consoles, this falls back to a numeric menu."
   [options]
-  (let [^Terminal term @terminal]
-    (if (arrow-menu-supported? term)
-      (create-arrow-menu! options)
-      (create-fallback-menu! options))))
-
+  (if (term/arrow-menu-supported?)
+    (create-arrow-menu! options)
+    (create-fallback-menu! options)))

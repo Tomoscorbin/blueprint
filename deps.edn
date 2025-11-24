@@ -4,6 +4,7 @@
         org.jline/jline {:mvn/version "3.30.6"}
         org.jline/jline-reader   {:mvn/version "3.30.6"}
         org.jline/jline-terminal {:mvn/version "3.30.6"}
+        org.jline/jline-terminal-jni {:mvn/version "3.30.0"}
         com.github.clj-easy/graal-build-time {:mvn/version "1.0.5"}}
 
  :aliases
