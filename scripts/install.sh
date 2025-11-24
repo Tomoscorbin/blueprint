@@ -120,13 +120,31 @@ fi
 echo
 echo "Installed ${BINARY_NAME} to ${TARGET}"
 
-
 # 9. PATH hint for bash shells (Linux / macOS / Git Bash)
-# Normalise BIN_DIR once (strip trailing slash if present)
-BIN_DIR="${BIN_DIR%/}"
-if [[ ":$PATH:" != *":$BIN_DIR:"* && ":$PATH:" != *":$BIN_DIR/:"* ]]; then
+
+# Normalise BIN_DIR to a canonical path (handles .., symlinks, etc.)
+BIN_REAL="$(cd "${BIN_DIR}" 2>/dev/null && pwd -P || printf '%s\n' "${BIN_DIR}")"
+
+ON_PATH="false"
+
+# Split PATH on ':' and compare canonicalised dirs
+IFS=':' read -r -a __bp_path_parts <<< "${PATH:-}"
+for __bp_entry in "${__bp_path_parts[@]}"; do
+  [ -z "${__bp_entry}" ] && continue
+
+  # Canonicalise each PATH component in the same way
+  ENTRY_REAL="$(cd "${__bp_entry}" 2>/dev/null && pwd -P || printf '%s\n' "${__bp_entry}")"
+
+  if [ "${ENTRY_REAL}" = "${BIN_REAL}" ]; then
+    ON_PATH="true"
+    break
+  fi
+done
+
+if [ "${ON_PATH}" != "true" ]; then
   echo
   echo "NOTE: ${BIN_DIR} is not on your PATH."
-  echo "Add this line to your shell profile (e.g. ~/.bashrc, ~/.zshrc, or Git Bash ~/.bashrc):"
+  echo "Add this line to your shell profile (e.g. ~/.bashrc, ~/.zshrc):"
   echo "  export PATH=\"${BIN_DIR}:\$PATH\""
 fi
+
