@@ -120,10 +120,13 @@ fi
 echo
 echo "Installed ${BINARY_NAME} to ${TARGET}"
 
+
 # 9. PATH hint for bash shells (Linux / macOS / Git Bash)
-if ! echo ":$PATH:" | tr ':' '\n' | grep -qx "${BIN_DIR}"; then
+# Normalise BIN_DIR once (strip trailing slash if present)
+BIN_DIR="${BIN_DIR%/}"
+if [[ ":$PATH:" != *":$BIN_DIR:"* && ":$PATH:" != *":$BIN_DIR/:"* ]]; then
   echo
   echo "NOTE: ${BIN_DIR} is not on your PATH."
-  echo "Add this line to your shell profile (e.g. ~/.bashrc, ~/.zshrc):"
+  echo "Add this line to your shell profile (e.g. ~/.bashrc, ~/.zshrc, or Git Bash ~/.bashrc):"
   echo "  export PATH=\"${BIN_DIR}:\$PATH\""
 fi
