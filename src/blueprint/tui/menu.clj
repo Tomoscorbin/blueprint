@@ -12,9 +12,73 @@
   (:import
    [org.jline.terminal Terminal]))
 
-;; --- ANSI helpers ----------------------------------------------------------
+(def ^:private zero-code
+  "Integer code point for character '0'."
+  48)
 
-(def ^:private esc "\u001b[")
+(def ^:private nine-code
+  "Integer code point for character '9'."
+  57)
+
+(def ^:private semicolon-code
+  "Integer code point for character ';'."
+  59)
+
+(def ^:private enter-key-codes
+  "Integer key codes that should be treated as Enter (CR and LF)."
+  #{13 10})
+
+(def ^:private escape-key-code
+  "Integer key code for the Escape key."
+  27)
+
+(def ^:private eof-code
+  "Reader EOF sentinel; JLine returns -1 when the input stream is closed."
+  -1)
+
+(def ^:private csi-int
+  "Second byte for CSI-based arrow-key escape sequences: ESC [ ..."
+  91) ; '['
+
+(def ^:private ss3-int
+  "Second byte for SS3-based (application mode) arrow-key sequences: ESC O ..."
+  79) ; 'O'
+
+(def ^:private final-up-arrow-code
+  "Final byte for the Up arrow ANSI sequence (A/B/C/D)."
+  65) ; 'A'
+
+(def ^:private final-down-arrow-code
+  "Final byte for the Down arrow ANSI sequence (A/B/C/D)."
+  66) ; 'B'
+
+(def ^:private final-right-arrow-code
+  "Final byte for the Right arrow ANSI sequence (A/B/C/D)."
+  67) ; 'C'
+
+(def ^:private final-left-arrow-code
+  "Final byte for the Left arrow ANSI sequence (A/B/C/D)."
+  68) ; 'D'
+
+(def ^:private arrow-final-codes
+  "Set of all recognised final arrow-key codes (we only map up/down)."
+  #{final-up-arrow-code
+    final-down-arrow-code
+    final-right-arrow-code
+    final-left-arrow-code})
+
+(def ^:private final-arrow-code->direction
+  "Mapping from final arrow-key byte code to the up/down directions."
+  {final-up-arrow-code   :up
+   final-down-arrow-code :down})
+
+(def ^:private esc
+  "ANSI escape prefix used for constructing control sequences."
+  "\u001b[")
+
+(def ^:private pointer
+  "Menu pointer symbol; uses ASCII on Windows to avoid Unicode rendering issues."
+  (if (term/windows?) ">" "▶"))
 
 (defn- print-ansi!
   "Print a raw ANSI sequence (or plain text) and flush immediately."
@@ -22,9 +86,20 @@
   (print (apply str parts))
   (flush))
 
-(defn- save-cursor!    [] (print-ansi! esc "s"))
-(defn- restore-cursor! [] (print-ansi! esc "u"))
-(defn- clear-line!     [] (print-ansi! esc "2K"))
+(defn- save-cursor!
+  "Save the current cursor position using an ANSI escape sequence."
+  []
+  (print-ansi! esc "s"))
+
+(defn- restore-cursor!
+  "Restore the cursor to the last saved position."
+  []
+  (print-ansi! esc "u"))
+
+(defn- clear-line!
+  "Clear the entire current line."
+  []
+  (print-ansi! esc "2K"))
 
 (defn- goto-line!
   "Move the cursor to line `n` relative to the saved cursor position.
@@ -39,10 +114,6 @@
   "Wrap `s` in a bold green SGR sequence."
   [s]
   (str esc "1;32m" s esc "0m"))
-
-(def ^:private pointer
-  ;; Use an ASCII pointer on Windows to avoid Unicode rendering issues.
-  (if (term/windows?) ">" "▶"))
 
 (defn- print-option!
   "Print a single menu option line at the current cursor position,
@@ -62,27 +133,6 @@
   (goto-line! 2)
   (print-ansi! esc line-count "M")) ; CSI n M (DL = Delete Line)
 
-;; --- Validation ------------------------------------------------------------
-
-(defn- valid-option?
-  "Return true if x is a [keyword label] pair."
-  [x]
-  (and (vector? x)
-       (= 2 (count x))
-       (keyword? (first x))
-       (string? (second x))))
-
-(defn- validate-options!
-  "Ensure options is a non-empty sequence of [keyword label] pairs.
-   Returns the options unchanged if valid, otherwise throws."
-  [options]
-  (when (or (not (sequential? options))
-            (empty? options)
-            (not (every? valid-option? options)))
-    (throw (ex-info "options must be a non-empty sequence of [keyword label] pairs"
-                    {:options options})))
-  options)
-
 ;; --- Rendering block for arrow menu ----------------------------------------
 
 (defn- render-options-block!
@@ -100,10 +150,10 @@
 ;; --- Escape-sequence / key handling ----------------------------------------
 
 (defn- digit-or-semicolon?
-  "Return true if c is the code point for '0-'9' or ';'."
+  "Return true if c is the code point for '0'-'9' or ';'."
   [c]
-  (or (and (>= c 48) (<= c 57)) ; '0'..'9'
-      (= c 59)))                ; ';'
+  (or (and (>= c zero-code) (<= c nine-code))
+      (= c semicolon-code)))
 
 (defn- read-arrow-key
   "Assuming the initial ESC has already been read, consume the rest of an
@@ -113,30 +163,28 @@
   - nil if the sequence is not recognised or incomplete"
   [read-ch]
   (let [c2 (read-ch)]
-    (if (or (= c2 91)  ; '['  (CSI)
-            (= c2 79)) ; 'O'  (SS3 / application mode)
+    (if (or (= c2 csi-int)   ; ESC [ ...
+            (= c2 ss3-int))  ; ESC O ...
       (let [final (loop [c (read-ch)]
                     (cond
                       ;; end-of-stream or error → give up
-                      (or (nil? c) (= c -1))
+                      (or (nil? c) (= c eof-code))
                       nil
 
                       ;; final arrow keys: A/B/C/D
-                      (or (= c 65) (= c 66) (= c 67) (= c 68))
+                      (arrow-final-codes c)
                       c
 
                       ;; if we see digits or ';', keep reading (e.g. ESC [ 1 ; 5 A)
                       (digit-or-semicolon? c)
                       (recur (read-ch))
 
-                      ;; something else we do not understand → give up
+                      ;; something else we don't understand → give up
                       :else
                       nil))]
-        (case final
-          65 :up    ; 'A'
-          66 :down  ; 'B'
-          ;; Left/right are ignored for now.
-          nil))
+        ;; Only up/down are mapped; left/right still result in nil.
+        (when final
+          (get final-arrow-code->direction final)))
       ;; Not a CSI/SS3 sequence we care about.
       nil)))
 
@@ -152,11 +200,11 @@
   (let [ch (read-ch)]
     (cond
       ;; Enter: CR or LF
-      (or (= ch 13) (= ch 10))
+      (contains? enter-key-codes ch)
       :enter
 
       ;; ESC … (arrow keys etc.)
-      (= ch 27)
+      (= ch escape-key-code)
       (or (read-arrow-key read-ch) :other)
 
       :else
@@ -200,7 +248,6 @@
 (defn- create-arrow-menu!
   "Arrow-key menu implementation for arrow-menu-supported terminals."
   [options]
-  (validate-options! options)
   (let [options-vec (vec options)
         ;; blank line + options
         line-count  (inc (count options-vec))
@@ -243,7 +290,6 @@
   "Numeric menu for terminals where raw keys aren't reliable (e.g. plain
    Windows consoles)."
   [options]
-  (validate-options! options)
   (let [options-vec (vec options)
         max-index   (dec (count options-vec))]
     (loop []
