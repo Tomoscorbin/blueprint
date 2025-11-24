@@ -124,6 +124,6 @@ echo "Installed ${BINARY_NAME} to ${TARGET}"
 if ! echo ":$PATH:" | tr ':' '\n' | grep -qx "${BIN_DIR}"; then
   echo
   echo "NOTE: ${BIN_DIR} is not on your PATH."
-  echo "Add this line to your shell profile (e.g. ~/.bashrc, ~/.zshrc, or Git Bash ~/.bashrc):"
+  echo "Add this line to your shell profile (e.g. ~/.bashrc, ~/.zshrc):"
   echo "  export PATH=\"${BIN_DIR}:\$PATH\""
 fi
