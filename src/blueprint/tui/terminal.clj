@@ -8,7 +8,11 @@
   (:import
    [org.jline.terminal TerminalBuilder Terminal]))
 
-;; ----- Environment / terminal detection ------------------------------------
+;; ----- Constants -----------------------------------------------------------
+
+(def ^:private esc "\u001b[")
+
+;; ----- Environment / OS detection -----------------------------------------
 
 (defn windows?
   "Return true if we are running on a Windows OS."
@@ -22,9 +26,23 @@
   []
   (some? (System/getenv "MSYSTEM")))
 
+(defn- windows-mintty?
+  "True when running on Windows under an MSYS/Git Bash environment (mintty)."
+  []
+  (and (windows?) (msys?)))
+
+(defn- plain-windows-console?
+  "True when running on a plain Windows console (cmd/PowerShell/Windows Terminal)
+   rather than an MSYS / Git Bash environment."
+  []
+  (and (windows?) (not (msys?))))
+
+;; ----- Terminal construction -----------------------------------------------
+
 (defn- build-terminal
   "Create the shared JLine Terminal.
 
+  Behaviour:
   - Always try to use the *system* terminal so JLine can toggle raw mode.
   - On Windows (incl. MSYS/Git Bash), prefer the JNI provider if present.
   - If no system terminal can be created (CI, redirected IO, etc.), fall back
@@ -32,7 +50,7 @@
   ^Terminal
   []
   (let [builder (doto (TerminalBuilder/builder)
-                  ;; Always wrap the real process terminal
+                  ;; Always wrap the real process terminal.
                   (.system true)
                   ;; If a system terminal can't be created, use a dumb one
                   ;; instead of failing with \"Unable to create a system terminal\".
@@ -40,7 +58,7 @@
     (when (windows?)
       (try
         ;; For Windows / Cygwin / MSYS JLine’s own docs recommend the native
-        ;; (JNI / FFM) providers for proper behaviour. 
+        ;; (JNI / FFM) providers for proper behaviour.
         (.provider builder "jni")
         (catch Throwable _
           ;; If the JNI provider is not on the classpath, just fall back to the
@@ -57,12 +75,18 @@
   []
   @terminal*)
 
+(defn- terminal-type
+  "Return the JLine terminal type string (e.g. \"xterm-256color\", \"dumb\")."
+  []
+  (let [^Terminal t (terminal)]
+    (.getType t)))
+
 (defn- dumb-terminal?
   "True if JLine thinks this is a 'dumb' terminal (no real capabilities)."
   []
-  (let [^Terminal t (terminal)
-        term-type (.getType t)]
-    (#{"dumb" "dumb-color"} term-type)))
+  (#{"dumb" "dumb-color"} (terminal-type)))
+
+;; ----- Capability checks ---------------------------------------------------
 
 (defn ansi-capable?
   "Return true if this environment is one where ANSI escape sequences are
@@ -70,13 +94,13 @@
 
   Heuristic:
   - Exclude 'dumb' terminals (redirected IO / CI).
-  - Non-Windows: assume ANSI capable.
-  - Windows + MSYS (Git Bash): assume ANSI capable.
-  - Plain Windows consoles (PowerShell/cmd without MSYS): treat as non-ANSI."
+  - On non-Windows, assume ANSI capable.
+  - On Windows + MSYS (Git Bash / mintty), assume ANSI capable.
+  - On plain Windows consoles (PowerShell/cmd without MSYS), treat as non-ANSI."
   []
   (and (not (dumb-terminal?))
        (or (not (windows?))
-           (msys?))))
+           (windows-mintty?))))
 
 (defn arrow-menu-supported?
   "Return true if we are happy to use the arrow-key TUI.
@@ -89,11 +113,9 @@
   []
   (and (not (dumb-terminal?))
        (or (not (windows?))
-           (msys?))))
+           (windows-mintty?))))
 
 ;; ----- Styling / question helpers ------------------------------------------
-
-(def ^:private esc "\u001b[")
 
 (defn style-answer
   "Style an answer string for display in a prompt.
@@ -116,6 +138,10 @@
   On non-ANSI terminals, this is a no-op."
   [s]
   (when (ansi-capable?)
-    (print (str esc "1A" "\r" esc "2K" s "\n"))
+    (print (str esc "1A"        ; cursor up one line
+                "\r"            ; carriage return
+                esc "2K"        ; clear entire line
+                s
+                "\n"))
     (flush))
   nil)
