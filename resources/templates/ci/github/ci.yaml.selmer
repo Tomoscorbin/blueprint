@@ -52,7 +52,7 @@ jobs:
       DATABRICKS_CLIENT_ID: {% verbatim %}${{ secrets.DATABRICKS_CLIENT_ID }}{% endverbatim %}
       DATABRICKS_CLIENT_SECRET: {% verbatim %}${{ secrets.DATABRICKS_CLIENT_SECRET }}{% endverbatim %}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: databricks/setup-cli@main
       - run: databricks bundle validate
 {% endif %}
