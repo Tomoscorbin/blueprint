@@ -15,6 +15,7 @@
    [blueprint.exec :as exec]
    [blueprint.tui.core :as tui]))
 
+;;TODO: force user to provide valid python package name
 (defn- prompt-answers!
   "Interactively collect the high-level project configuration from the user.
 

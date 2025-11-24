@@ -65,3 +65,27 @@
       (is (nil?
            (runtime/resolve-databricks-runtime {}))
           "missing project-type also yields no Databricks runtime"))))
+
+(deftest resolve-databricks-package-versions-only-for-dabs-projects
+  (testing "resolve-databricks-package-versions returns package versions only for :dabs projects"
+    (let [calls    (atom 0)
+          expected {:databricks_pyspark_version "4.0.0"
+                    :databricks_delta_version   "3.2.1"}]
+      (with-redefs [runtime/runtime-package-versions
+                    (fn []
+                      (swap! calls inc)
+                      expected)]
+        (is (= expected
+               (runtime/resolve-databricks-package-versions {:project-type :dabs}))
+            ":dabs projects get the Databricks package versions from the manifest")
+
+        (is (nil?
+             (runtime/resolve-databricks-package-versions {:project-type :python-lib}))
+            "non-dabs projects do not have Databricks package versions")
+
+        (is (nil?
+             (runtime/resolve-databricks-package-versions {}))
+            "missing project-type also yields no Databricks package versions")
+
+        (is (= 1 @calls)
+            "runtime-package-versions should only be invoked for :dabs projects")))))

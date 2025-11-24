@@ -7,14 +7,15 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-  "pyspark",
+  "pyspark{% if project_type = :dabs %}=={{ databricks_pyspark_version }}{% endif %}",
   "pytest",
   "pytest-cov",
   "ruff",
   "mypy",
   "commitizen",
   "pre-commit",
-  {{ if (= project_type "dabs") }}"databricks-connect"{{ end }},
+  {% if project_type = :dabs %}"delta-spark=={{ databricks_delta_version }}"{% endif %},
+  {% if project_type = :dabs %}"databricks-connect"{% endif %},
 ]
 
 [project.scripts]

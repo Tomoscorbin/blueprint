@@ -3,7 +3,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [blueprint.runtime :as runtime]))
-;;TODO: force user to provide valid python package name??
+
 (def ^:private layout-spec
   {:main            {:destination "src/{pkg}/main.py"
                      :source "templates/main.py.selmer"}
@@ -143,9 +143,11 @@
 (defn- collect-additional-details
   "Derived properties shared across templates."
   [answers]
-  {:python_version_value (runtime/resolve-python-version answers)
-   :requires_python_value (runtime/resolve-requires-python answers)
-   :databricks_runtime (runtime/resolve-databricks-runtime answers)})
+  (let [package-versions (runtime/resolve-databricks-package-versions answers)]
+    (cond-> {:python_version_value  (runtime/resolve-python-version answers)
+             :requires_python_value (runtime/resolve-requires-python answers)
+             :databricks_runtime    (runtime/resolve-databricks-runtime answers)}
+      package-versions (merge package-versions))))
 
 (defn template-data
   "Build the full Selmer template data map from the user's answers.

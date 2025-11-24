@@ -36,6 +36,14 @@
   []
   (:version (load-runtime-manifest)))
 
+;;TODO: integrate this with requires-python 
+(defn- runtime-package-versions
+  "Return a map of package versions derived from the Databricks runtime manifest."
+  []
+  (let [{:keys [spark delta]} (load-runtime-manifest)]
+    {:databricks_pyspark_version spark
+     :databricks_delta_version   delta}))
+
 (defn resolve-python-version
   "Return the Python version string to use for the project.
 
@@ -63,3 +71,10 @@
   [{:keys [project-type]}]
   (when (= :dabs project-type)
     (runtime-version)))
+
+(defn resolve-databricks-package-versions
+  "Return a map of package versions derived from the Databricks runtime manifest
+  when the project type is :dabs. For other project types, returns nil."
+  [{:keys [project-type]}]
+  (when (= :dabs project-type)
+    (runtime-package-versions)))
