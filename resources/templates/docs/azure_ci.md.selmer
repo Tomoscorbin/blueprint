@@ -18,6 +18,11 @@ you will need to create a new Pipeline pointing to this file.
 CI only runs for pull requests that target the main branch. Direct pushes to main are blocked by
 pre-commit and branch rules; you work via PRs.
 
+Because our CI pipelines call the same Makefile targets as local development, and those targets
+use `uv` under the hood, we can let `uv` manage the Python version and dependencies for us. `uv` reads 
+the version from `.python-version`, so the Python runtime used in CI is automatically aligned with 
+your local development environment and dependencies.
+
 {% if project_type = :dabs %}
 
 ## Databricks bundle validation
