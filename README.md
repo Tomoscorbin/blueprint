@@ -44,7 +44,7 @@ Then, in the generated repo root:
 
 ```bash
 make sync      # create virtualenv and install dependencies with uv
-git init       # initialise a git repository (required for hooks)
+git init -b main      # initialise a git repository (required for hooks)
 make hook      # install pre-commit hooks into .git/hooks
 ```
 
