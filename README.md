@@ -43,9 +43,9 @@ Follow the arrow-key prompts (project name, CI provider, project type, and Datab
 Then, in the generated repo root:
 
 ```bash
-make sync      # create virtualenv and install dependencies with uv
-git init -b main      # initialise a git repository (required for hooks)
-make hook      # install pre-commit hooks into .git/hooks
+make sync           # create virtualenv and install dependencies with uv
+git init -b main    # initialise a git repository (required for hooks)
+make hook           # install pre-commit hooks into .git/hooks
 ```
 
 Note: `git init` is required before `make hook`, because pre-commit needs an initialised Git repository to install
