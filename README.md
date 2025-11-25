@@ -4,7 +4,7 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Tomoscorbin/blueprint/ci.yaml?label=CI)
 
 An opinionated CLI for spinning up data engineering projects. It takes care of boilerplate setup like static analysis,
-CI pipelines, and Python packaging, so you are not wiring the same basics together from scratch every time you
+CI pipelines, and Python packaging, so you aren't wiring the same basics together from scratch every time you
 start a new project.
 
 - 🧱 Project scaffold: sets up a full data-engineering repo with sensible defaults for structure, config, and tooling
