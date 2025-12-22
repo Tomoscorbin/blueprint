@@ -53,6 +53,18 @@ jobs:
       DATABRICKS_CLIENT_SECRET: {% verbatim %}${{ secrets.DATABRICKS_CLIENT_SECRET }}{% endverbatim %}
     steps:
       - uses: actions/checkout@v5
-      - uses: databricks/setup-cli@main
+
+      # Extract the CLI version from databricks.yaml 
+      - name: Extract Databricks CLI version
+        id: cli_version
+        uses: mikefarah/yq@v4
+        with:
+          cmd: yq -r '.bundle.databricks_cli_version' databricks.yaml
+
+      - name: Setup Databricks CLI
+        uses: databricks/setup-cli@main
+        with:
+          version: {% verbatim %}"${{ steps.cli_version.outputs.result }}"{% endverbatim %}
+
       - run: databricks bundle validate
 {% endif %}

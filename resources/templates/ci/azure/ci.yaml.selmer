@@ -76,10 +76,18 @@ stages:
       - job: bundle
         displayName: "Validate bundle"
         steps:
-          - script: |
-              curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+          - checkout: self
+
+          - bash: |
+              set -euo pipefail
+
+              file="$(ls -1 databricks.y*ml | head -n1)"
+              version="$(grep -m1 -E '^\s*databricks_cli_version:' "$file" | cut -d: -f2- | tr -d ' "	')"
+
+              curl -fsSL "https://raw.githubusercontent.com/databricks/setup-cli/v${version}/install.sh" | sh
+              databricks --version
               databricks bundle validate
-            displayName: "Validate bundle"
+            displayName: "Install pinned CLI + validate"
             env:
               DATABRICKS_CLIENT_ID: $(DATABRICKS_CLIENT_ID)
               DATABRICKS_CLIENT_SECRET: $(DATABRICKS_CLIENT_SECRET)

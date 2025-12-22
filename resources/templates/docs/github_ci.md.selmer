@@ -51,4 +51,8 @@ to validate/deploy bundles. Then generate an OAuth client ID and secret for it. 
 
 Once those two secrets are set, the bundle job can authenticate and run databricks bundle validate against the
 workspace defined in `databricks.yaml`.
+
+### Databricks CLI version pinning
+The workflow installs the Databricks CLI version declared in `databricks.yaml` (`bundle.databricks_cli_version`) 
+before running bundle validation. This keeps CI aligned with the version the bundle expects, avoiding issues caused by different CLI versions.
 {% endif %}
